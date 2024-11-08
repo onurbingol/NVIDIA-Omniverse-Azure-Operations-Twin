@@ -1,0 +1,34 @@
+<!--
+SPDX-FileCopyrightText: Copyright (c) 2024 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+SPDX-License-Identifier: LicenseRef-NvidiaProprietary
+
+NVIDIA CORPORATION, its affiliates and licensors retain all intellectual
+property and proprietary rights in and to this material, related
+documentation and any modifications thereto. Any use, reproduction,
+disclosure or distribution of this material and related documentation
+without an express license agreement from NVIDIA CORPORATION or
+its affiliates is strictly prohibited.
+-->
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <link rel="icon" type="image/svg+xml" href="vite.svg" />
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="theme-color" content="#000000" />
+        <meta
+          name="description"
+          content="This is a joint react starter kit to provide a sample to conect to OVAS and bi-directionally interact with PowerBI created by MSFT and NVIDIA."
+        />
+        <script type="module">
+            import { Buffer } from "buffer";
+            window.Buffer = Buffer;
+          </script>   
+        <title>Contoso HyperMarket</title>
+    </head>
+    <body>
+        <div id="root"></div>
+        <script type="module" src="src/main.tsx"></script>
+    </body>
+</html>
