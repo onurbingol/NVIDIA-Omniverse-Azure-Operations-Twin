@@ -1,4 +1,6 @@
 <!-- vscode-markdown-toc -->
+Trademarks This project may contain trademarks or logos for projects, products, or services. Authorized use of Microsoft trademarks or logos is subject to and must follow <a href="https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks/usage/general">Microsoft’s Trademark & Brand Guidelines</a>. Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship. Any use of third-party trademarks or logos are subject to those third-party’s policies.
+
 * 1. [Infrastructure Setup {#infrastructure-setup}](#InfrastructureSetupinfrastructure-setup)
 	* 1.1. [Architecture and Technology Stack {#architecture-and-technology-stack}](#ArchitectureandTechnologyStackarchitecture-and-technology-stack)
 	* 1.2. [Workflow {#workflow}](#Workflowworkflow)
