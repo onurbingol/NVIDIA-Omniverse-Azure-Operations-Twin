@@ -83,7 +83,7 @@ Trademarks This project may contain trademarks or logos for projects, products, 
 
 <img src="images/image2.png" style="width:6.5in;height:3.41667in" />
 
-Contoso Hypermarket is a global leader in the food processing industry and at the forefront of industrial digitalization. With a sprawling operational footprint that spans multiple countries, the company is committed to leveraging cutting-edge technologies to drive innovation, operational excellence, sustainability, and safety across its extensive network of production facilities.
+Contoso Hypermarket, famously a leading international consumer goods distributor and retailer (<a href='https://aka.ms/ArcJumpstartAgoraCHM'>Arc Jumpstart Agora</a>), has expanded to the food processing industry and are at the forefront of industrial digitization. With a sprawling operational footprint that spans multiple countries, the company is committed to leveraging cutting-edge technologies to drive innovation, operational excellence, sustainability, and safety across its extensive network of production facilities.
  
 At the heart of their operations lies a sophisticated integration of Azure IoT Operations, NVIDIA Omniverse, and OpenUSD. This unique combination of platforms and technologies power physically accurate 3D representations of the company’s industrial systems, connected to real-time data at the edge. These capabilities enable their operations teams to gain a comprehensive view of operations, accelerate decision-making, and enhance overall operational efficiency.
  
