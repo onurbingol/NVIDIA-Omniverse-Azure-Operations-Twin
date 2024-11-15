@@ -83,28 +83,13 @@ Trademarks This project may contain trademarks or logos for projects, products, 
 
 <img src="images/image2.png" style="width:6.5in;height:3.41667in" />
 
-Hook \= Business Value Impact – motivate Developers (let’s capture the value broad enough incl IoT but captures production data)
-
-* Industries are concentrating their SMEs to central locations, where they are being asked more than ever to give expert guidance to sites around the world. The combination of real-time machine data, in context and overlaid on 3D visualizations, means can gain situational awareness and react faster than ever.  
-* Industries are migrating toward a 3D centric workflow  
-  * Attrition of experts  
-  * Data vs information   
-  * ...  
-* 3D centric workflows allow industries to quickly navigate to areas of interest, discovery issues, concerns, etc., and perform analysis, mitigation  
-* Microsoft IoT brings together bronze, silver, and gold data together into a unified data lake  
-* Omniverse Visualization brings the data to life by providing photorealistic and physics accurate representation of the data 
-
-Today, developers are building solutions to provide Remote Operations Centers to a variety of industries from factory monitoring/automation to monitoring of physical assets.  These developers need mechanisms to quickly unify data from various ingress sources into a single unified environment.  From the unified data environment, the developers need to build out applications that display the data in a 3D centric physical representation while maintaining access to the rich underlying data.  This enables their users to gain situational awareness for analytics, decision making, maintenance, operations tracking, etc.  
-
-Microsoft Fabric platform brings together raw (bronze data), silver (post-processed data) and gold data (interpreted data) into a single data platform for ingress and dissemination.  Nvidia Omniverse leverages industry standard OpenUSD to bridge the physical representation of the data with the data platform.
-
-Better Together \= Technical Strengths
-
-Fabric \+ Omniverse diagram of omniverse with authoring and reality capture feeding in, while fabric is the data foundation 
-
-Microsoft – AIO – Fabric – 1D 2D Data – Contextualization – Analytics – Dashboarding 
-
-NVIDIA \- Omniverse – Simulation – Physically Accurate Rendering – Interactive – USD Standards based \- 
+Contoso Hypermarket is a global leader in the food processing industry and at the forefront of industrial digitalization. With a sprawling operational footprint that spans multiple countries, the company is committed to leveraging cutting-edge technologies to drive innovation, operational excellence, sustainability, and safety across its extensive network of production facilities.
+ 
+At the heart of their operations lies a sophisticated integration of Azure IoT Operations, NVIDIA Omniverse, and OpenUSD. This unique combination of platforms and technologies power physically accurate 3D representations of the company’s industrial systems, connected to real-time data at the edge. These capabilities enable their operations teams to gain a comprehensive view of operations, accelerate decision-making, and enhance overall operational efficiency.
+ 
+Like Contoso Hypermarket, many enterprises are embracing AI to achieve more automated and autonomous systems and facilities. This shift has led to the centralization of operations teams in remote operations centers, where they embrace more interactive and intuitive 3D workflows to achieve their goals. These workflows allow teams to quickly navigate areas of interest, identify issues, perform analyses, and provide expert guidance to distributed production sites.
+ 
+Microsoft and NVIDIA are empowering enterprises to transform their operations by enabling developers to build advanced 3D workflows that seamlessly unify and integrate operational IoT data with physics-based visualizations of operations. The Fabric platform provides developers with a robust foundation for data ingress and dissemination, while Omniverse and OpenUSD enable them to bring collaboration, simulation and physically based rendering capabilities to their solutions. By building solutions with these powerful capabilities, developers can ensure that operations teams are equipped with the tools and data they need to innovate and deliver more sustainable, safe, and efficient operations.
 
 ##  2. <a name='OmniverseKitAppStreamingInfrastructureSetup'></a>Omniverse Kit App Streaming Infrastructure Setup
 
