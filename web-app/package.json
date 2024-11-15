@@ -1,7 +1,7 @@
 {
     "name": "@msft/NVIDIA-Omniverse-Azure-Operations-Twin",
     "version": "1.0",
-    "description": "See README.md",
+    "description": "This project shares sample code and content for an operations twin built on an integration between NVIDIA Omniverse and Azure Services: Azure IoT Operations, Microsoft Fabric, Microsoft Power BI, NVIDIA Omniverse, and NVIDIA Omniverse Kit App Streaming.",
     "author": "Microsoft / NVIDIA",
     "license": "SEE LICENSE IN LICENSE.md",
     "private": true,

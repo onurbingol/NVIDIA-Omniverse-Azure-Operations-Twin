@@ -70,13 +70,8 @@ Trademarks This project may contain trademarks or logos for projects, products, 
 		* 4.2.3. [*Power BI Data Connections*](#PowerBIDataConnections)
 		* 4.2.4. [*Event Hubs*](#EventHubs)
 	* 4.3. [Event Hub React Component Configuration](#EventHubReactComponentConfiguration)
-	* 4.4. [3D Viewport React Component Configuration](#DViewportReactComponentConfiguration)
-	* 4.5. [Azure Static Web Application Deployment](#AzureStaticWebApplicationDeployment)
-		* 4.5.1. [ *Deploying a React App to Azure Static Web Apps using Azure Portal*](#DeployingaReactApptoAzureStaticWebAppsusingAzurePortal)
-* 5. [Final End-to-End Validation](#FinalEnd-to-EndValidation)
-	* 5.1. [3D Viewer Component](#3DViewerComponent)
-	* 5.2. [Power BI Component](#PowerBIComponent)
-	* 5.3. [Validation of Complete ISV Web App Deployment](#ValidationofCompleteISVWebAppDeployment)
+	* 4.4. [Azure Static Web Application Deployment](#AzureStaticWebApplicationDeployment)
+		* 4.4.1. [ *Deploying a React App to Azure Static Web Apps using Azure Portal*](#DeployingaReactApptoAzureStaticWebAppsusingAzurePortal)
 
 <!-- vscode-markdown-toc-config
 	numbering=true
@@ -497,10 +492,6 @@ Please deploy a DNS TXT record under the name:
 Look for one or more bolded line(s) below the line ';ANSWER'. It should show the value(s) you've just added.   
 
 Add the record in DNS Management > Recordsets and verify that the record shows up with the link provided in the command output above.
-👀👀
-<!-- TODO Drew to provide these two images -->
-![][image24]  
-![][image25]
 
 Once you have verified that the TXT entry shows up press Enter. If this fails, try running the command again or waiting longer.
 
@@ -1828,24 +1819,30 @@ Now validate the backend running using the following steps, in the order present
 
 An opinionated example web app is provided for reference as a starting point; with ISV developers expected and encouraged to further customize these examples for their own use cases. This section expands on the ISV Web App portion of the overall architecture diagram.
 
-<img src="images/image58.png" style="max-width:100%;height:2.46356in" />
+<img src="images/image58.png" style="height:2.46356in" />
 
 See [APPLICATION_DEVELOPMENT.md](APPLICATION_DEVELOPMENT.md) to create the web app.
 
 ###  4.1. <a name='DeployingWebClientApplicationinAzure'></a>Deploying Web Client Application in Azure
 
-This section focuses on installing and deploying the bundled sample web client front-end.  See the Appendix for information on developing this custom ISV web client sample.  For the purposes of this sample, presume that the web client is going to be deployed as an Azure Static Web App (the ‘www’ icon in above diagram).
+This section focuses on installing and deploying the bundled sample web client front-end.  See  [APPLICATION_DEVELOPMENT.md](APPLICATION_DEVELOPMENT.md) for information on developing this custom ISV web client sample.  For the purposes of this sample, presume that the web client is going to be deployed as an Azure Static Web App (the ‘www’ icon in above diagram).
 
 The ‘Dashboard’ provides the top-level index.html and React ‘App.tsx’ that presents two panels with the P*ower BI Repor*t (IoT) on left overlayed on the Omniverse powered *3D Viewport* on right, which are kept in sync by the Redux based web App State.
 
-There is also a developer focused “test” panel available in ‘debug’ sub-folder for testing end-to-end streaming and messaging functionality between front-end and back-end for both local streaming and remote cloud streaming scenarios.  Please see Appendix for more information.
+#### 3D Viewport Hints
+Once the Web App fully deploys users should be able to navigate around in the 3D Viewport panel using mouse controls or WSAD movement.  [Viewport Navigation — Omniverse Extensions latest documentation](https://docs.omniverse.nvidia.com/extensions/latest/ext_core/ext_viewport/navigation.html)  When an object in the 3D Viewport scene is “picked” (left mouse click), that information is sent to the Power BI Report.   Note that only pre-specified objects in the scene are pickable. 
+
+#### 3D Streaming Test
+There is also a developer focused “test” panel available in ‘web-app/src/debug’ sub-folder for testing end-to-end streaming and messaging functionality between Omniverse front-end and back-end for both local streaming and remote cloud streaming scenarios.  Please see [APPLICATION_DEVELOPMENT.md](APPLICATION_DEVELOPMENT.md) for more information.
+
+#### Configuration
 
 In the web-app folder there is a .env file at the root and authConfig.tsx in src folder for all business parameters to be set. 
 
-<img src="images/image59.png" style="max-width:100%;height:4in" />
+<img src="images/image59.png" style="max-width:100%" />
 
 
-<img src="images/image60.png" style="max-width:100%;height:3.5in" />
+<img src="images/image60.png" style="max-width:100%" />
 
 
 ###  4.2. <a name='PowerBIReactComponentConfiguration'></a> Power BI React Component Configuration
@@ -1911,18 +1908,18 @@ Note; The organization and description of these tables may be found in the assoc
 
 To get the *POWERBI_VISUAL_ID*  of the Power BI for BI-Directional interaction from the 3D Viewport <> Power BI the Visual Slicer ID is needed to be filled out in the *.env* file with the parameter named *POWERBI_VISUAL_ID*. To get the *POWERBI_VISUAL_ID* of the Power BI Slicer see console.log noted here:
 
-<img src="images/image61.png" style="max-width:100%;height:4in" />
+<img src="images/image61.png" style="max-width:100%" />
 
 
 In the .env file set parameters *POWERBI_TABLE_NAME* and *POWERBI_COLUMN_NAME* to equal the table name and column name in the dataset inside the Power BI. 
 
 The values of the *POWERBI_COLUMN_NAME* matching the *asset_id* parameters set in the USD will allow for BI-Directional selection.
 
-<img src="images/image62.png" style="max-width:100%;height:4.2in" />
+<img src="images/image62.png" style="max-width:100%" />
 
 Once everything is setup correctly meshes or group of meshes with *asset_id* parameter assigned to them in USD matching the table.column in Power BI slicer the Bi-Directional selecting will appear as this:
 
-<img src="images/image63.png" style="max-width:100%;height:7in" />
+<img src="images/image63.png" style="max-width:100%" />
 
 ####  4.2.4. <a name='EventHubs'></a>*Event Hubs*
 
@@ -1949,27 +1946,17 @@ Note: The *processEvents()* callback performs a check on the current pressure an
 
 To use the event data inside the 3D viewport the global state must be updated. We provide a simple example in code in the file *EventHubStreamComponent*. The data payload will be JSON and can be parsed and sent as needed shown here:
 
-<img src="images/image64.png" style="max-width:100%;height:4.4in" />
+<img src="images/image64.png" style="max-width:100%" />
 
 For a more general tutorial on how to does this, please see [Send or receive events using JavaScript \- Azure Event Hubs | Microsoft Learn](https://learn.microsoft.com/en-us/azure/event-hubs/event-hubs-node-get-started-send?tabs=passwordless%2Croles-azure-portal)
 
-
-
-###  4.4. <a name='DViewportReactComponentConfiguration'></a>3D Viewport React Component Configuration
-
-The 3D Viewport React Component is configured via changing the web app’s global state variables.  Hence, update the initial state of the Redux global state to reflect those initial values.   The initial state values in the web-app/src/state/slice/serviceSlice.ts file should match the ones set in the ISV Custom Kit App Configuration section above.
-
-    appId: 'usd-viewer-msft',  
-    version: '106.1.0',  
-    profile: 'azurelb-wss',
-
-###  4.5. <a name='AzureStaticWebApplicationDeployment'></a>Azure Static Web Application Deployment
+###  4.4. <a name='AzureStaticWebApplicationDeployment'></a>Azure Static Web Application Deployment
 
 The web-app sub-folder in the GitHub repo includes everything in ISV Web App, including Power BI component, Redux component, and 3D Viewport Component.  The Power BI React Component provides the integration between Power BI Reports and the Redux based global state manager via Redux Slices and Reducers.  The 3D Viewport Component encapsulates the Omniverse Streaming functionality and likewise provides the integration with the Redux global state manager via Slices and Reducers. 
 
 See [APPLICATION_DEVELOPMENT.md](APPLICATION_DEVELOPMENT.md) to create the web-app.
 
-####  4.5.1. <a name='DeployingaReactApptoAzureStaticWebAppsusingAzurePortal'></a> *Deploying a React App to Azure Static Web Apps using Azure Portal*
+####  4.4.1. <a name='DeployingaReactApptoAzureStaticWebAppsusingAzurePortal'></a> *Deploying a React App to Azure Static Web Apps using Azure Portal*
 
 ##### Create a New Azure Static Web App
 
@@ -2004,19 +1991,3 @@ See [APPLICATION_DEVELOPMENT.md](APPLICATION_DEVELOPMENT.md) to create the web-a
 
 1. Once the deployment is complete, navigate to the **Overview** section of your Static Web App.  
 2. Click on the **Site URL** to verify that your React app is deployed and accessible.
-
-##  5. <a name='FinalEnd-to-EndValidation'></a>Final End-to-End Validation
-
-###  5.1. <a name='3DViewerComponent'></a> 3D Viewer Component
-
-This step validates that pod containing and Envoy proxy is running in Kubernetes can be accessed remotely via Azure cloud using Omniverse Kit App Streaming with WebRTC streaming Omniverse Viewport to the bundled React app running in an Edge or Chrome browser. See GitHub Repo “testing” panel.
-
-Web client users should be able to navigate around in the 3D Viewport panel using mouse controls or WSAD movement.  [Viewport Navigation — Omniverse Extensions latest documentation](https://docs.omniverse.nvidia.com/extensions/latest/ext_core/ext_viewport/navigation.html)    When an object in the 3D Viewport scene is “picked” (left mouse click), that information is sent to the Power BI Report.   Note that only pre-specified objects in the scene are pickable. 
-
-###  5.2. <a name='PowerBIComponent'></a>Power BI Component
-
-*Signing in should present Power BI report, with IoT data streaming into report tables.*
-
-###  5.3. <a name='ValidationofCompleteISVWebAppDeployment'></a>Validation of Complete ISV Web App Deployment
-
-*How to validate the two panels together in top-level web app. TBD*
