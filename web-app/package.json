@@ -1,8 +1,8 @@
 {
-    "name": "@nvidia/web-viewer-sample",
-    "version": "1.1.0",
-    "description": "Sample application to showcase streaming of Omniverse Kit applications to a web client application and communicates to other components via Redux state.",
-    "author": "Microsoft & Nvidia",
+    "name": "@msft/NVIDIA-Omniverse-Azure-Operations-Twin",
+    "version": "1.0",
+    "description": "See README.md",
+    "author": "Microsoft / NVIDIA",
     "license": "SEE LICENSE IN LICENSE.md",
     "private": true,
     "type": "module",
