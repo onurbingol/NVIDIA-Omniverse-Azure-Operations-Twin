@@ -1,0 +1,1 @@
+# Microsoft USD Viewer Setup Extension [msft.usd_viewer.setup]

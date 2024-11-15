@@ -1,0 +1,28 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "install",
+            "type": "shell",
+            "command": "npm install",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "open-browser",
+            "type": "shell",
+            "command": "start http://localhost:5173",
+            "windows": {
+                "command": "start http://localhost:5173"
+            },
+            "problemMatcher": [],
+            "dependsOn": [
+                "install"
+            ]
+            
+        }
+    ]
+}

@@ -1,0 +1,80 @@
+# SPDX-FileCopyrightText: Copyright (c) 2024 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: MIT
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+# DEALINGS IN THE SOFTWARE.
+
+[package]
+title = "Microsoft USD Viewer Setup Extension"
+version = "1.0.0"  # Semantic Versionning is used: https://semver.org/
+description = "The setup extension for the USD Viewer template."
+category = "Setup"  # How to categorize this in the Extension Manager
+changelog = "docs/CHANGELOG.md"
+icon = "data/icon.png"  # Icon to show in the Extension Manager
+keywords = ["kit", "extension", "setup"]  # Search keywords for the Extension Manager
+preview_image = "data/preview.png"  # Preview to show in the Extension Manager
+readme  = "docs/README.md"  # Path (relative to the root) or content of readme markdown file for UI
+repository = "https://github.com/NVIDIA-Omniverse/kit-app-template"  # URL of the extension source repository
+
+
+[dependencies]
+"omni.kit.usd.layers" = {}
+"omni.activity.ui" = {order=1000}   # Progress activity messages
+"omni.kit.quicklayout" = {}
+"omni.kit.viewport.utility" = {}
+"msft.usd_viewer.messaging" = {}  # Required messaging extension
+
+
+[settings.app]
+useFabricSceneDelegate = true  # Turn on the Fabric scene delegate by default
+
+
+[settings.exts."msft.usd_viewer.setup"]
+menu_visible = false
+
+
+[[python.module]]  # Main python module this extension provides, it will be publicly available as "import omni.hello.world"
+name = "msft.usd_viewer.setup"
+
+
+[documentation]
+pages = [
+    "docs/Overview.md",
+    "docs/CHANGELOG.md",
+]
+
+
+[[test]]
+dependencies = [
+    "msft.usd_viewer",
+    "omni.kit.mainwindow",
+    "omni.kit.ui_test",
+]
+
+args = [
+    "--/app/layout/name=default",
+    "--/app/fastShutdown=1",
+    "--/app/file/ignoreUnsavedOnExit=true",
+    "--/app/window/dpiScaleOverride=1.0",
+    "--/app/window/height=720",
+    "--/app/window/scaleToMonitor=false",
+    "--/app/window/width=1280",
+    "--/exts/omni.kit.viewport.window/startup/windowName=Viewport",
+    "--no-window",
+    "--reset-user"
+]

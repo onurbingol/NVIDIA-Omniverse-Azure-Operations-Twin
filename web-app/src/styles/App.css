@@ -1,0 +1,176 @@
+
+/*
+SPDX-FileCopyrightText: Copyright (c) 2024 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+SPDX-License-Identifier: MIT
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+ */
+
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  
+  #video-group {
+    width: 100%;
+    height: 90vh;
+  }
+  
+  .logo {
+    height: 6em;
+    padding: 1.5em;
+    will-change: filter;
+    transition: filter 300ms;
+  }
+  .logo:hover {
+    filter: drop-shadow(0 0 2em #646cffaa);
+  }
+  .logo.react:hover {
+    filter: drop-shadow(0 0 2em #61dafbaa);
+  }
+  
+  @keyframes logo-spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  @media (prefers-reduced-motion: no-preference) {
+    a:nth-of-type(2) .logo {
+      animation: logo-spin infinite 20s linear;
+    }
+  }
+  
+  .card {
+    padding: 2em;
+  }
+  
+  .read-the-docs {
+    color: #888;
+  }
+
+  
+  code {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+      monospace;
+  }
+  
+  
+  .navbarStyle {
+      padding: 0.5rem 1rem !important;
+      background-color: #111;
+      position: absolute;
+      top:0px;
+      left:0px;
+      right:0;
+      height:58px;
+      z-index:3;
+  }
+  .navbar-brand{color:#fff!important}
+  
+  .navbar-brand img{
+    width:250px;
+  }
+
+  .navbar-jumpstart img{
+    width:190px;
+    padding-top:12px;
+  }
+
+  
+
+  .navbarButton {
+      color: #fff !important;
+      padding: 0.5rem 1rem !important;
+  }
+  
+  .iconText {
+      margin: 0 0.5rem;
+  }
+  
+  .navbarButton {
+      color: #fff !important;
+  }
+  
+  .user-info-div,.messsages-div {
+    float:left;
+    padding:12px;
+    width:100%
+  }
+  
+  .pbi-div{
+    top:48px;
+    left:0px;
+    width:720px;
+    height:920px;
+    bottom:0px;
+    position: absolute;
+    z-index:2;
+  }
+  .streaming-div{
+    top:55px;
+    left:0px;
+    right:0px;
+    bottom:0px;
+    position: absolute;
+    z-index:1;
+  }
+  
+  .box-div {
+    width:200px;
+    margin:12px;
+    padding:12px;
+    text-wrap:wrap;
+  }
+  
+  .signInButton {
+      margin: 1rem;
+  }
+  
+  .bi-embedded{
+    width:720px;
+    height:920px;
+  }
+
+
+  #eventView{
+    position: absolute;
+    color:#fff;
+    top:14px;
+    z-index: 10000;
+    left:44%;
+    display:none;
+  }
+
+  #eventView li{
+    list-style:none;
+  }
+
+  #eventErrors{
+    display: none;
+  }
+

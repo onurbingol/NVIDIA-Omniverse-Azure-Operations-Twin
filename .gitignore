@@ -36,4 +36,23 @@ deps/**/user.toml
 
 # Streaming EventTrace
 *.etli
-/node_modules
+
+**/web-app/node_modules/
+**/web-app/dist/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
