@@ -1,100 +1,62 @@
-**Trademarks** This project may contain trademarks or logos for projects, products, or services. Authorized use of Microsoft trademarks or logos is subject to and must follow <a href="https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks/usage/general">Microsoft’s Trademark & Brand Guidelines</a>. Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship. Any use of third-party trademarks or logos are subject to those third-party’s policies.
+Trademarks This project may contain trademarks or logos for projects, products, or services. Authorized use of Microsoft trademarks or logos is subject to and must follow <a href="https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks/usage/general">Microsoft’s Trademark & Brand Guidelines</a>. Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship. Any use of third-party trademarks or logos are subject to those third-party’s policies.
 
-<!-- vscode-markdown-toc -->
-* 1. [Contoso Overview](#ContosoOverview)
-* 2. [Omniverse Kit App Streaming Infrastructure Setup](#OmniverseKitAppStreamingInfrastructureSetup)
-	* 2.1. [Architecture and Technology Stack](#ArchitectureandTechnologyStack)
-	* 2.2. [Workflow](#Workflow)
-	* 2.3. [Requirements](#Requirements)
-	* 2.4. [Prerequisites](#Prerequisites)
-	* 2.5. [Technical Skills required](#TechnicalSkillsrequired)
-	* 2.6. [Azure Resource Deployment](#AzureResourceDeployment)
-		* 2.6.1. [*Azure Resources Diagram*](#AzureResourcesDiagram)
-		* 2.6.2. [*Create Resource Group*](#CreateResourceGroup)
-		* 2.6.3. [*Create Virtual Network*](#CreateVirtualNetwork)
-		* 2.6.4. [*Add Subnets to the Virtual Network*](#AddSubnetstotheVirtualNetwork)
-		* 2.6.5. [*Create Network Security Groups*](#CreateNetworkSecurityGroups)
-		* 2.6.6. [*Assign to subnets 'subnet-aks' and 'subnet-apim'*](#Assigntosubnetssubnet-aksandsubnet-apim)
-	* 2.7. [DNS and Certificate Configuration](#DNSandCertificateConfiguration)
-		* 2.7.1. [*Create self-signed certificates for private DNS zone*](#Createself-signedcertificatesforprivateDNSzone)
-		* 2.7.2. [*Create LetsEncrypt certificates manually for public DNS zone*](#CreateLetsEncryptcertificatesmanuallyforpublicDNSzone)
-		* 2.7.3. [*Create a .pfx from the full chain certificate and private key*](#Createa.pfxfromthefullchaincertificateandprivatekey)
-	* 2.8. [AKS Cluster Configuration](#AKSClusterConfiguration)
-		* 2.8.1. [*Create AKS Cluster*](#CreateAKSCluster)
-		* 2.8.2. [*Create Nodepools*](#CreateNodepools)
-		* 2.8.3. [*Configure Networking*](#ConfigureNetworking)
-		* 2.8.4. [*Confirm and create cluster*](#Confirmandcreatecluster)
-		* 2.8.5. [*RBAC Setup*](#RBACSetup)
-		* 2.8.6. [*Pull kubeconfig locally and check access*](#Pullkubeconfiglocallyandcheckaccess)
-	* 2.9. [API Management Service](#APIManagementService)
-		* 2.9.1. [*Create APIM Service*](#CreateAPIMService)
-		* 2.9.2. [*Configure Custom Domain and Private DNS Zone*](#ConfigureCustomDomainandPrivateDNSZone)
-	* 2.10. [Application Gateway Service with Web Application Firewall](#ApplicationGatewayServicewithWebApplicationFirewall)
-* 3. [Omniverse Kit App Streaming Deployment and Configuration](#OmniverseKitAppStreamingDeploymentandConfiguration)
-	* 3.1. [(Optional) Move External Dependencies to your own artifact storage](#OptionalMoveExternalDependenciestoyourownartifactstorage)
-	* 3.2. [Download Sample and Resources Files](#DownloadSampleandResourcesFiles)
-	* 3.3. [Create Kubernetes Namespace](#CreateKubernetesNamespace)
-	* 3.4. [Create Image Registry Pull Secret](#CreateImageRegistryPullSecret)
-	* 3.5. [Install NVIDIA GPU Operator on AKS](#InstallNVIDIAGPUOperatoronAKS)
-	* 3.6. [Install Memcached on AKS](#InstallMemcachedonAKS)
-	* 3.7. [Install Flux on AKS](#InstallFluxonAKS)
-	* 3.8. [Install Omniverse Resource Management Control Plane (RMCP) on AKS](#InstallOmniverseResourceManagementControlPlaneRMCPonAKS)
-	* 3.9. [Create and deploy a custom Omniverse Kit Application](#CreateanddeployacustomOmniverseKitApplication)
-		* 3.9.1. [Upload ISV custom kit app to a Container Registry](#UploadISVcustomkitapptoaContainerRegistry)
-		* 3.9.2. [*Configure ISV Custom Kit App for Deployment*](#ConfigureISVCustomKitAppforDeployment)
-	* 3.10. [Upload ISV custom kit app to a Container Registry](#UploadISVcustomkitapptoaContainerRegistry-1)
-		* 3.10.1. [*Create Azure Container Registry using the Azure Portal*](#CreateAzureContainerRegistryusingtheAzurePortal)
-	* 3.11. [Upload Helm Charts etc from NGC recommendation](#UploadHelmChartsetcfromNGCrecommendation)
-	* 3.12. [Helm Chart Deployment and Configuration](#HelmChartDeploymentandConfiguration)
-		* 3.12.1. [*Set environment-specific values*](#Setenvironment-specificvalues)
-		* 3.12.2. [*Internal ingress controller helm nginx ingress controller*](#Internalingresscontrollerhelmnginxingresscontroller)
-		* 3.12.3. [*FluxCD helm flux2*](#FluxCDhelmflux2)
-		* 3.12.4. [*GPU Operator helm gpu operator*](#GPUOperatorhelmgpuoperator)
-		* 3.12.5. [*Memcached helm memcached*](#Memcachedhelmmemcached)
-		* 3.12.6. [*ExternalDNS scripts external dns*](#ExternalDNSscriptsexternaldns)
-		* 3.12.7. [*Create required secrets*](#Createrequiredsecrets)
-	* 3.13. [Omniverse Kit App Streaming Services](#OmniverseKitAppStreamingServices)
-		* 3.13.1. [*Streaming helm kit appstreaming manager*](#Streaminghelmkitappstreamingmanager)
-		* 3.13.2. [*Applications helm kit appstreaming applications*](#Applicationshelmkitappstreamingapplications)
-		* 3.13.3. [*RMCP helm kit appstreaming rmcp*](#RMCPhelmkitappstreamingrmcp)
-		* 3.13.4. [ *Deploy the custom streaming resources manifests omniverse azure*](#Deploythecustomstreamingresourcesmanifestsomniverseazure)
-		* 3.13.5. [*Deploy HelmRepository manifests helm repostiories*](#DeployHelmRepositorymanifestshelmrepostiories)
-		* 3.13.6. [*Create private DNS record for ingress controller*](#CreateprivateDNSrecordforingresscontroller)
-		* 3.13.7. [*Create public DNS entry for App Gateway*](#CreatepublicDNSentryforAppGateway)
-	* 3.14. [Validate Omniverse Kit App Streaming End Points via Swagger UI](#ValidateOmniverseKitAppStreamingEndPointsviaSwaggerUI)
-* 4. [ ISV Web App deployment](#ISVWebAppdeployment)
-	* 4.1. [Deploying Web Client Application in Azure](#DeployingWebClientApplicationinAzure)
-	* 4.2. [ Power BI React Component Configuration](#PowerBIReactComponentConfiguration)
-		* 4.2.1. [*Azure Apps Registration*](#AzureAppsRegistration)
-		* 4.2.2. [*Power BI Workspace Settings*](#PowerBIWorkspaceSettings)
-		* 4.2.3. [*Power BI Data Connections*](#PowerBIDataConnections)
-		* 4.2.4. [*Event Hubs*](#EventHubs)
-	* 4.3. [Event Hub React Component Configuration](#EventHubReactComponentConfiguration)
-	* 4.4. [Azure Static Web Application Deployment](#AzureStaticWebApplicationDeployment)
-		* 4.4.1. [ *Deploying a React App to Azure Static Web Apps using Azure Portal*](#DeployingaReactApptoAzureStaticWebAppsusingAzurePortal)
+<!-- Table of Contents generation command line: "doctoc README.md --github --maxlevel 3"
+     See https://github.com/thlorenz/doctoc for more information on MIT Licensed 'doctoc' tool. -->
 
-<!-- vscode-markdown-toc-config
-	numbering=true
-	autoSave=true
-	/vscode-markdown-toc-config -->
-<!-- /vscode-markdown-toc -->
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-##  1. <a name='ContosoOverview'></a>Contoso Overview
 
-<img src="images/image2.png" style="width:6.5in;height:3.41667in" />
+- [Contoso Overview](#contoso-overview)
+- [Omniverse Kit App Streaming Infrastructure Setup](#omniverse-kit-app-streaming-infrastructure-setup)
+  - [Architecture and Technology Stack](#architecture-and-technology-stack)
+  - [Workflow](#workflow)
+  - [Requirements](#requirements)
+  - [Prerequisites](#prerequisites)
+  - [Technical Skills required](#technical-skills-required)
+  - [Azure Resource Deployment](#azure-resource-deployment)
+  - [DNS and Certificate Configuration](#dns-and-certificate-configuration)
+  - [AKS Cluster Configuration](#aks-cluster-configuration)
+  - [API Management Service](#api-management-service)
+  - [Application Gateway Service with Web Application Firewall](#application-gateway-service-with-web-application-firewall)
+- [Omniverse Kit App Streaming Deployment and Configuration](#omniverse-kit-app-streaming-deployment-and-configuration)
+  - [(Optional) Move External Dependencies to your own artifact storage](#optional-move-external-dependencies-to-your-own-artifact-storage)
+  - [Download Sample and Resources Files](#download-sample-and-resources-files)
+  - [Create Kubernetes Namespace](#create-kubernetes-namespace)
+  - [Create Image Registry Pull Secret](#create-image-registry-pull-secret)
+  - [Install NVIDIA GPU Operator on AKS](#install-nvidia-gpu-operator-on-aks)
+  - [Install Memcached on AKS](#install-memcached-on-aks)
+  - [Install Flux on AKS](#install-flux-on-aks)
+  - [Install Omniverse Resource Management Control Plane (RMCP) on AKS](#install-omniverse-resource-management-control-plane-rmcp-on-aks)
+  - [Create and deploy a custom Omniverse Kit Application](#create-and-deploy-a-custom-omniverse-kit-application)
+  - [Upload ISV custom kit app to a Container Registry](#upload-isv-custom-kit-app-to-a-container-registry)
+  - [Upload Helm Charts etc from NGC recommendation](#upload-helm-charts-etc-from-ngc-recommendation)
+  - [Helm Chart Deployment and Configuration](#helm-chart-deployment-and-configuration)
+  - [Omniverse Kit App Streaming Services](#omniverse-kit-app-streaming-services)
+  - [Validate Omniverse Kit App Streaming End Points via Swagger UI](#validate-omniverse-kit-app-streaming-end-points-via-swagger-ui)
+- [ISV Web App deployment](#isv-web-app-deployment)
+  - [Deploying Web Client Application in Azure](#deploying-web-client-application-in-azure)
+  - [Power BI React Component Configuration](#power-bi-react-component-configuration)
+  - [Event Hub React Component Configuration](#event-hub-react-component-configuration)
+  - [Azure Static Web Application Deployment](#azure-static-web-application-deployment)
 
-Contoso Hypermarket, famously a leading international consumer goods distributor and retailer (<a href='https://aka.ms/ArcJumpstartAgoraCHM'>Arc Jumpstart Agora</a>), has expanded to the food processing industry and are at the forefront of industrial digitization. With a sprawling operational footprint that spans multiple countries, the company is committed to leveraging cutting-edge technologies to drive innovation, operational excellence, sustainability, and safety across its extensive network of production facilities.
- 
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+## Contoso Overview
+
+<img src="images/image2.png"/>
+
+Contoso Hypermarket, famously a leading international consumer goods distributor and retailer ([Jumpstart Agora](https://aka.ms/ArcJumpstartAgoraCHM)), has expanded to the food processing industry and are at the forefront of industrial digitization.With a sprawling operational footprint that spans multiple countries, the company is committed to leveraging cutting-edge technologies to drive innovation, operational excellence, sustainability, and safety across its extensive network of production facilities.
+
 At the heart of their operations lies a sophisticated integration of Azure IoT Operations, NVIDIA Omniverse, and OpenUSD. This unique combination of platforms and technologies power physically accurate 3D representations of the company’s industrial systems, connected to real-time data at the edge. These capabilities enable their operations teams to gain a comprehensive view of operations, accelerate decision-making, and enhance overall operational efficiency.
- 
+
 Like Contoso Hypermarket, many enterprises are embracing AI to achieve more automated and autonomous systems and facilities. This shift has led to the centralization of operations teams in remote operations centers, where they embrace more interactive and intuitive 3D workflows to achieve their goals. These workflows allow teams to quickly navigate areas of interest, identify issues, perform analyses, and provide expert guidance to distributed production sites.
- 
+
 Microsoft and NVIDIA are empowering enterprises to transform their operations by enabling developers to build advanced 3D workflows that seamlessly unify and integrate operational IoT data with physics-based visualizations of operations. The Fabric platform provides developers with a robust foundation for data ingress and dissemination, while Omniverse and OpenUSD enable them to bring collaboration, simulation and physically based rendering capabilities to their solutions. By building solutions with these powerful capabilities, developers can ensure that operations teams are equipped with the tools and data they need to innovate and deliver more sustainable, safe, and efficient operations.
 
-##  2. <a name='OmniverseKitAppStreamingInfrastructureSetup'></a>Omniverse Kit App Streaming Infrastructure Setup
+## Omniverse Kit App Streaming Infrastructure Setup
 
-###  2.1. <a name='ArchitectureandTechnologyStack'></a>Architecture and Technology Stack
-
+### Architecture and Technology Stack
 
 <img src="images/image3.png" />
 
@@ -104,26 +66,26 @@ The left side of this architectural diagram feeds IoT data via Azure IoT Operati
 
 Legend for Architecture Diagram:
   1. Azure IoT Edge Telemetry Orchestration (plant floor, smart buildings)
-  2. Telemetry Data Stream Contextualization via Azure Data Explorer
-  3. USD Assets retrieved from Azure BLOB Storage
-  4. Omniverse Scene Rendering and App Streaming
-  5. Interactive digital twin composed of embedded 3D Viewport with Power BI Report in a single dashboard.
+  2. Telemetry Data Stream Contextualization via Azure Real Time Intelligence
+  3. USD Assets retrieved from Azure Blob Storage
+  4. Omniverse Scene Rendering and Kit App Streaming
+  5. Interactive digital twin composed of Omniverse accelerated 3D Viewport with Power BI Report in a single dashboard.
 
-The 3D Viewport is composed of two parts: an interactive Omniverse streaming client that displays a remotely cloud rendered Omniverse 3D scene via low-latency Omniverse Kit App Streaming.   The Omniverse cloud rendering is implemented using Azure Kubernetes Service (AKS) and Omniverse Kit App Streaming that orchestrates a scalable NVIDIA RTX GPU accelerated compute and network infrastructure for an Omniverse Kit App.  Both the front-end 3D Viewport client and the backend Omniverse Kit App are expected to be customized by the ISV for their use cases.   More information about doing this customization may be found in the associated GitHub Repo.
+The 3D Viewport is composed of two parts: an interactive Omniverse streaming client that displays a remotely cloud rendered 3D OpenUSD scene via low-latency Omniverse Kit App Streaming.   The Omniverse cloud rendering is implemented using Azure Kubernetes Service (AKS) and Omniverse Kit App Streaming that orchestrates a scalable NVIDIA RTX GPU accelerated compute and network infrastructure for an Omniverse Kit App.  Both the front-end 3D Viewport client and the backend Omniverse Kit App are expected to be customized by the ISV for their use cases.   More information about doing this customization may be found in the associated GitHub Repo.
 
 This ARC Jumpstart guide provides the essential information needed by an ISV to implement this architecture in their own Azure Commercial Tenant cloud environment.
 
-###  2.2. <a name='Workflow'></a>Workflow
+### Workflow
 
 This Activity Diagram presents a visual overview of the recommended workflow as described in the sections below.
 
-<img src="images/image4.png" style="width:4.04167in;height:6.5in"/>
+<img src="images/image4.png" style="width:4in"/>
 
-###  2.3. <a name='Requirements'></a>Requirements
+### Requirements
 
 Please review technical requirements of the [NVIDIA Omniverse Application Streaming API](https://docs.omniverse.nvidia.com/ovas/latest/deployments/infra/requirements.html#requirements)
 
-###  2.4. <a name='Prerequisites'></a>Prerequisites
+### Prerequisites
 
 Prerequisites required to complete this setup include
 
@@ -145,7 +107,26 @@ Prerequisites required to complete this setup include
 
 * Creation of a web app per [APPLICATION_DEVELOPMENT.md](APPLICATION_DEVELOPMENT.md)
 
-###  2.5. <a name='TechnicalSkillsrequired'></a>Technical Skills required
+#### Domain and DNS
+
+This guide assumes you have access to a public domain (e.g. `iai-contoso.com`), which is managed by [Azure DNS](https://learn.microsoft.com/en-us/azure/dns/dns-overview)
+and have permission to create subdomains for it e.g. `kitstreaming.iai-contoso.com`.
+
+#### NVIDIA NGC Account Sign-Up and API Token
+
+During the installation process you will need to create a `NGC API TOKEN` which is necessary to pull Kit App Streaminng
+container images and Helm Charts from NVIDIA NGC.
+
+- Please Sign Up to NGC using these [steps](https://docs.nvidia.com/ngc/gpu-cloud/ngc-user-guide/index.html#account-signup)
+- Create a `NGC API TOKEN` using these [steps](https://docs.nvidia.com/ngc/gpu-cloud/ngc-user-guide/index.html#generating-api-key)
+
+Store the API TOKEN in a secure place, it will be needed in later steps of the installation process
+
+#### Helm Repository Setup
+
+- Please follow these [steps](https://docs.omniverse.nvidia.com/ovas/latest/deployments/infra/installation.html#add-helm-repositories) to set up the Helm repository references on your deployment system
+
+### Technical Skills required
 
 * Azure: This JumpStart expects familiarity with the Azure Portal, Azure technology stack including Azure Kubernetes Service,
 Networking and Storage.
@@ -155,7 +136,7 @@ Networking and Storage.
 * Helm Charts: Entry level knowledge of installation of Helm Charts is recommended.
 
 
-###  2.6. <a name='AzureResourceDeployment'></a>Azure Resource Deployment
+### Azure Resource Deployment
 
 To access your subscription login to [http://portal.azure.com](http://portal.azure.com) and make sure you are in the correct subscription.
 
@@ -173,11 +154,11 @@ From here, the setup steps assume the following:
 
 * The public DNS zone for our deployment is iai-contoso.com and we will create a record for the subdomain kitstreaming in subsequent steps.
 
-####  2.6.1. <a name='AzureResourcesDiagram'></a>*Azure Resources Diagram*
+#### *Azure Resources Diagram*
 
-<img src="images/image5.png" style="width:6.5in;height:5.92708in"/>
+<img src="images/image5.png" style="width:5in"/>
 
-####  2.6.2. <a name='CreateResourceGroup'></a>*Create Resource Group* 
+#### *Create Resource Group* 
 
 - Using the search tool at the top of the portal home page, search for `Resource Groups`
 - Select the “Resource Groups” option to navigate to the Resource Groups page
@@ -187,9 +168,9 @@ From here, the setup steps assume the following:
 - Provide a name for the resource group and select the region, e.g. `US South Central US`, or wherever you want this resource group to be created.  
 - Click “Review+Create” button, do a final review of the supplied information in the next screen and click “Create”.
 
-<img src="images/image6.png" style="width:6.5in;height:3.30069in"/>
+<img src="images/image6.png" style="width:6.5in"/>
 
-####  2.6.3. <a name='CreateVirtualNetwork'></a>*Create Virtual Network* 
+#### *Create Virtual Network* 
 
 - Using the search tool at the top of the portal home page, search for “Virtual Networks”
 - Select the “Virtual Networks” option from the search results to navigate to “Virtual Networks” page. 
@@ -203,10 +184,10 @@ From here, the setup steps assume the following:
 - Delete the `default` address space (e.g. 10.0.0.0/16)
 - Create a new address space `10.2.0.0/16`, or if that address space already in use enter another available address space (e.g. `10.123.0.0/16`) and use it consistently throughout.
 
-<img src="images/image7.png" style="width:6.5in;height:6.63681in"/>
+<img src="images/image7.png" style="width:6.5in"/>
 
 
-####  2.6.4. <a name='AddSubnetstotheVirtualNetwork'></a>*Add Subnets to the Virtual Network*
+#### *Add Subnets to the Virtual Network*
 
 In this section we will add three subnets to the `10.2.0.0/16` Virtual Network created.  
 Name of the subnet and IP address space for each subnet are shown below.
@@ -217,35 +198,35 @@ Name of the subnet and IP address space for each subnet are shown below.
 
 * `subnet-apim` - `10.2.2.0/24`  
 
-<img src="images/image8.png" style="width:6.5in;height:4.77292in"/>
+<img src="images/image8.png" style="width:6.5in"/>
 
 ##### Create subnet for AKS
 
 Click “+ Add Subnet” button to navigate to “Add Subnet” dialog. 
 Enter all the required information as shown in the screenshot below for `subnet-aks` and click “Add” to create the subnet.
 
-<img src="images/image9.png" style="width:6.5in;height:6.87708in"/>
+<img src="images/image9.png" style="width:6.5in"/>
 
 ##### Create subnet for Web Application Firewall (WAF)
 
 Click “+ Add Subnet” button to navigate to “Add Subnet” dialog. 
 Enter all the required information as shown in the screenshot below for `subnet-waf` and click “Add” to create the subnet.
 
-<img src="images/image10.png" style="width:6.5in;height:6.43056in"/>
+<img src="images/image10.png" style="width:6.5in"/>
 
 ##### Create subnet for API Management (APIM) Gateway
 
 Click “+ Add Subnet” button to navigate to “Add Subnet” dialog. 
 Enter all the required information as shown in the screenshot below for `subnet-apim` and click “Add” to create the subnet.
 
-<img src="images/image11.png" style="width:6.5in;height:6.55417in"/>
+<img src="images/image11.png" style="width:6.5in"/>
 
 Finally, when all the subnets are created, click on “Review+Create” button on the “Create Virtual Network” dialog,
 perform a final review of the supplied information for the three new subnets, and click on “Create” to create the virtual network.
 
-<img src="images/image12.png" style="width:5.41695in;height:8.02819in"/>
+<img src="images/image12.png" style="width:5.41695in"/>
 
-####  2.6.5. <a name='CreateNetworkSecurityGroups'></a>*Create Network Security Groups*
+#### *Create Network Security Groups*
 
 - Using the search tool at the top of the portal home page, search for “Network Security Groups”, 
 - Select the “Network Security Groups” option from the search results to navigate to “Network Security Groups” page. 
@@ -257,7 +238,7 @@ perform a final review of the supplied information for the three new subnets, an
 - Review and Create the network security group.
 - Click on the newly created network security group.
 
-<img src="images/image13.png" style="width:6.5in;height:3.37917in"/>
+<img src="images/image13.png" style="width:6.5in"/>
 
 Create the following inbound rules as shown in the screenshots below.
 
@@ -345,20 +326,20 @@ Create the following inbound rules as shown in the screenshots below.
      
 ##### Image Snapshots for Network Security Group
 
-<img src="images/image14.png" style="width:6.5in;height:6.62778in"/>
+<img src="images/image14.png" style="width:6.5in"/>
 
-  <img src="images/image15.png" style="width:2.9348in;height:4.25393in"/>
-  <img src="images/image16.png" style="width:2.82645in;height:4.11031in"/>
+  <img src="images/image15.png" style="width:3in"/>
+  <img src="images/image16.png" style="width:3in"/>
 
-  <img src="images/image17.png" style="width:3.10235in;height:4.48475in"/>
-  <img src="images/image18.png" style="width:2.94753in;height:4.54437in"/>
+  <img src="images/image17.png" style="width:3in"/>
+  <img src="images/image18.png" style="width:3in"/>
 
-  <img src="images/image19.png" style="width:4.87098in;height:3.87493in"/>
+  <img src="images/image19.png" style="width:4.5in"/>
 
 In summary the following network rules should have been created, according to image below:
-  <img src="images/image20.png" style="width:6.5in;height:2.55278in"/>
+  <img src="images/image20.png" style="width:6.5in"/>
 
-####  2.6.6. <a name='Assigntosubnetssubnet-aksandsubnet-apim'></a>*Assign to subnets 'subnet-aks' and 'subnet-apim'* 
+#### *Assign to subnets 'subnet-aks' and 'subnet-apim'* 
 
 - Navigate to the `contoso-omniverse-nsg`
 - click on Settings and then Subnets to navigate to “contoso-omniverse-nsg | Subnets” page. 
@@ -366,14 +347,14 @@ In summary the following network rules should have been created, according to im
 and “subnet-aks” as the subnet to associate the network security group.  
 - Repeat the same process to associate the network security group to subnet “subnet-apm”
 
-<img src="images/image21.png" style="width:2.94559in;height:4.64481in"/>
-<img src="images/image22.png" style="width:2.97424in;height:4.63902in"/>
+<img src="images/image21.png" style="width:3in"/>
+<img src="images/image22.png" style="width:3in"/>
 
 In summary the assignment should be similar to this:
 
-<img src="images/image23.png" style="width:6.5in;height:5.54236in"/>
+<img src="images/image23.png" style="width:6.5in"/>
 
-###  2.7. <a name='DNSandCertificateConfiguration'></a>DNS and Certificate Configuration
+### DNS and Certificate Configuration
 
 These may be long lead items as they may require additional IT/Networking approvals.
 
@@ -381,7 +362,7 @@ To access from Internet requires permissions to insert DNS ‘A’ Record.
 
 Requires Certificate Authority (CA) signed certificate, as self-signed certificates may not be sufficient for public DNS.
 
-####  2.7.1. <a name='Createself-signedcertificatesforprivateDNSzone'></a>*Create self-signed certificates for private DNS zone*
+#### *Create self-signed certificates for private DNS zone*
 
 In the below commands, the private DNS zone is contoso-ov-kitappstreaming.net. Use following Bash script to generate both a root and SSL certificate:
 
@@ -428,7 +409,7 @@ openssl pkcs12 -export -out contoso-ov-kitappstreaming-signing-root.pfx  -inkey 
 openssl pkcs12 -export -out contoso-ov-kitappstreaming-ssl.pfx -inkey contoso-ov-kitappstreaming-ssl.key -in contoso-ov-kitappstreaming-ssl.crt -certfile contoso-ov-kitappstreaming-net-signing-root.crt -password pass:<password>
 ```
 
-####  2.7.2. <a name='CreateLetsEncryptcertificatesmanuallyforpublicDNSzone'></a>*Create LetsEncrypt certificates manually for public DNS zone*
+#### *Create LetsEncrypt certificates manually for public DNS zone*
 
 Create LetsEncrypt certificates manually for public DNS zone [https://certbot.eff.org/](https://certbot.eff.org/)
 
@@ -480,7 +461,7 @@ Add the record in DNS Management > Recordsets and verify that the record shows u
 
 Once you have verified that the TXT entry shows up press Enter. If this fails, try running the command again or waiting longer.
 
-####  2.7.3. <a name='Createa.pfxfromthefullchaincertificateandprivatekey'></a>*Create a .pfx from the full chain certificate and private key*
+#### *Create a .pfx from the full chain certificate and private key*
 Note: When creating this certificate, a password is required. 
 
 ```Shell
@@ -488,7 +469,7 @@ $ openssl pkcs12 -export -in /etc/letsencrypt/live/kitstreaming.iai-contoso.com/
 ```
 Your file will be named `<Public DNS Zone>.pfx`. Change the value after `-out` to name it differently. Save the location of this file, as it will need to be uploaded later.
 
-###  2.8. <a name='AKSClusterConfiguration'></a>AKS Cluster Configuration
+### AKS Cluster Configuration
 
 In this step the Azure Kubernetes cluster is created and configured. The technology stack running on Kubernetes
 requires 3 types of Worker Nodes:
@@ -526,7 +507,7 @@ to provision Azure virtual machines for the following AKS node pool configuratio
 
   * Minimum Quota Quantity: 1 VM
 
-####  2.8.1. <a name='CreateAKSCluster'></a>*Create AKS Cluster*
+#### *Create AKS Cluster*
 To provision the AKS cluster: 
 - Start by search & select “Kubernetes Services” in the Azure Portal top search box
 - Click “Create” -> “Kubernetes cluster”.
@@ -540,9 +521,9 @@ To provision the AKS cluster:
 - Do **NOT** click “Review + Create” yet, as we need to pre-configure Node pools and networking as part of creating the AKS cluster in the next step.
 - Navigate with **Next** to the `Node pools` configuration
 
-<img src="images/image26.png" style="width:4.67639in;height:7.72222in"/>
+<img src="images/image26.png" style="width:4.67639in"/>
 
-####  2.8.2. <a name='CreateNodepools'></a>*Create Nodepools*
+#### *Create Nodepools*
 
 We will create three node pools as part of the AKS cluster configuration i.e. Agent pool, Cache pool and GPU pool with 
 Azure VM SKU Types described in the introductory segment of AKS cluster configuration.
@@ -570,10 +551,10 @@ Azure VM SKU Types described in the introductory segment of AKS cluster configur
 
 Sample forms of the node pool configurations provided below for quick reference. 
 
-<img src="images/image27.png" style="width:3.19444in;height:5in"/>
-<img src="images/image28.png" style="width:3.18197in;height:4.98947in"/> 
+<img src="images/image27.png" style="width:3.2in"/>
+<img src="images/image28.png" style="width:3.2in"/> 
 
-<img src="images/image29.png" style="width:5.44167in;height:8.39236in"/>
+<img src="images/image29.png" style="width:5.5in"/>
 
 In summary your node pools should look similar to this:
 
@@ -583,21 +564,21 @@ In summary your node pools should look similar to this:
 - If required please open Azure support ticket to seek capacity allocation as described in [quickstart-increase-quota-portal](https://learn.microsoft.com/en-us/azure/quotas/quickstart-increase-quota-portal).
 - Once the node pools are configured, move onto the “Networking” tab to connect AKS cluster with the pre-created Virtual Network associated with necessary Network Security group rules.
 -------------------------------
-####  2.8.3. <a name='ConfigureNetworking'></a>*Configure Networking*
+#### *Configure Networking*
 
 - Select `Azure CNI Node Subnet` option for the Container Networking
 - Select `Bring your own Azure virtual network`
 - Select the previously created virtual network e.g. `contoso_omniverse_vnet`
 - Select as Cluster subnet the previously created subnet e.g. `subnet-aks`
 
-<img src="images/image30.png" style="width:3.83309in;height:6.36727in"/>
+<img src="images/image30.png" style="width:4in"/>
 
-####  2.8.4. <a name='Confirmandcreatecluster'></a>*Confirm and create cluster*
+#### *Confirm and create cluster*
 
 Review all the configurations across the “Basics”, “Node Pools” & “Networking” tabs of the “Create Kubernetes Cluster” form.
 When ready, click “Review + Create”. This step will take time as it involves provisioning compute resources as specified in the node pool configurations.  
 
-####  2.8.5. <a name='RBACSetup'></a>*RBAC Setup*
+#### *RBAC Setup*
 
 To access the AKS Cluster and manage resources inside Kubernetes, proper role assignments within the resource group must be completed.
 For below steps your user needs permissions to assign roles e.g. `Owner` or the `User Access Administrator` Role, the Contributor Role is not sufficient.
@@ -607,17 +588,17 @@ Add any user here that will need access to the cluster by completing the followi
 * Navigate to the previously created Resource Group e.g. `rg_contoso_omniverse`
 
 * Navigate to Access control (IAM)  
-  <img src="images/image31.png" style="width:3.06293in;height:1.96902in"/> 
+  <img src="images/image31.png" style="width:3.0in"/> 
     
 * Click Add, and navigate to Add role assignment  
     
-  <img src="images/image32.png" style="width:6.28275in;height:1.46329in"/>  
+  <img src="images/image32.png" style="width:6.3in"/>  
     
 * Search Azure Kubernetes Service in the role search  
 * Add desired user to Azure Kubernetes Service RBAC Cluster Admin  
 * Add desired user to Azure Kubernetes Service RBAC Admin
 
-####  2.8.6. <a name='Pullkubeconfiglocallyandcheckaccess'></a>*Pull kubeconfig locally and check access*
+#### *Pull kubeconfig locally and check access*
 
 For the following installation steps a user with `Azure Kubernetes Service RBAC Cluster Admin` is required due to
 installation of various services in many namespaces.
@@ -661,9 +642,9 @@ CoreDNS is running at https://contoso-aks-dns-ocrmfdj1.hcp.southcentralus.azmk8s
 Metrics-server is running at https://contoso-aks-dns-ocrmfdj1.hcp.southcentralus.azmk8s.io:443/api/v1/namespaces/kube-system/services/https:metrics-server:/proxy
 ```
 
-###  2.9. <a name='APIManagementService'></a>API Management Service
+### API Management Service
 
-####  2.9.1. <a name='CreateAPIMService'></a>*Create APIM Service*
+#### *Create APIM Service*
 
 In this step the [Azure API Management Service](https://learn.microsoft.com/en-us/azure/api-management/) is deployed
 and configured. The configuration will be tied together with an [Application Gateway](https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-integrate-internal-vnet-appgateway).
@@ -677,7 +658,7 @@ and configured. The configuration will be tied together with an [Application Gat
   - Select Pricing Tier `Developer (no SLA)`
 - Please do **NOT** click “Review + Create” yet, as we need configure a virtual network for the service in the “Virtual Network” tab.
 
-<img src="images/image33.png" style="width:4.99555in;height:5.96828in"/>
+<img src="images/image33.png" style="width:5in"/>
 
 
 - Hit `Next` to navigate to the Monitor and Secure tab
@@ -689,11 +670,11 @@ and configured. The configuration will be tied together with an [Application Gat
 - Hit `Review and create` to create the API Management Service Instance
 
 
-####  2.9.2. <a name='ConfigureCustomDomainandPrivateDNSZone'></a>*Configure Custom Domain and Private DNS Zone*
+#### *Configure Custom Domain and Private DNS Zone*
 
 1. Once deployed, add a custom domain:   
    1. Select Custom Domains under Deployment and Infrastructure  
-      <img src="images/image35.png" style="width:3.07292in;height:6.5in"/> 
+      <img src="images/image35.png" style="width:3.in"/> 
    2. Add a new custom domain for the gateway:   
       * **Type**: Gateway  
       * **Hostname**: [apim-gw.contoso-ov-kitappstreaming.net](http://apim-gw.ovas-streaming.net/)     ← This should be apim-gw.\<your private DNS\>  
@@ -701,7 +682,7 @@ and configured. The configuration will be tied together with an [Application Gat
       * **Certificate file**: contoso-ov-kitappstreaming-ssl.pfx  ← This is the self-signed certificate that was created previously  
       * **Check** Default SSL binding  
           
-        <img src="images/image36.png" style="width:2.6051in;height:3.92362in"/>
+        <img src="images/image36.png" style="width:2.6in"/>
    3. Add a new custom domain for the management gateway:   
       * **Type**: Management  
       * **Hostname**: [apim-mgmt.contoso-ov-kitappstreaming.net](http://apim-mgmt.ovas-streaming.net/)    ← This should be apim-mgmt.\<your private DNS\>  
@@ -709,14 +690,45 @@ and configured. The configuration will be tied together with an [Application Gat
       * **Certificate file**: contoso\-ov-kitappstreaming-ssl.pfx ← This should be what the SSL certificate file was named previously.  
         
 
-      <img src="images/image37.png" style="width:3.88685in;height:2.34872in"/>
+      <img src="images/image37.png" style="width:3.9in"/>
 
    *Note*: These settings can take up to an hour to apply
 
 2. Add DNS records to private DNS zone:   
    1. Add two **A records** for apim-gw and apim-mgmt to previously created private DNS zone pointing to private IP of the APIM instance created previously.
 
-###  2.10. <a name='ApplicationGatewayServicewithWebApplicationFirewall'></a>Application Gateway Service with Web Application Firewall
+#### *Add API route to ingress controller in APIM*
+
+1. Navigate to APIs under APIs in the APIM
+
+    <img src="images/image65.png" style="width:9in"/> 
+
+2. Create a new API with the name HTTP
+
+    <img src="images/image66.png" style="width:11in"/> 
+
+   1. Create a new GET operation under the HTTP API created in the last step
+      * **URL**: `/*`
+      * **Responses**:`200`
+
+    <img src="images/image67.png" style="width:10in"/> 
+
+      1. Navigate to `Backend > HTTP(s) endpoint`
+         1. Add the private DNS name given to the streaming services, `api.contoso-ov-kitstreaming.net`
+         2. Check the `Override` box next to `Service URL`
+         3. Select `HTTP(s) endpoint` instead of `Azure logic app`
+
+         <img src="images/image68.png" style="width:10in"/> 
+
+    2. Repeat this for `POST`, `DELETE` and `OPTIONS`
+
+      <img src="images/image69.png" style="width:10in"/>
+
+3. Turn off Subscription Key Requirement
+   1. Go to `APIM` > `APIs` > `APIs` > `http get` > 
+
+
+### Application Gateway Service with Web Application Firewall
 
 To provision the Application Gateway service, start by searching for “Application Gateway” in the Azure Portal top search box 
 and select “Application Gateways” option from the result list to navigate to “Load Balancing | Application Gateway” screen.
@@ -735,7 +747,7 @@ in the subsequent steps.
 * **Vnet:** Created in step 1  
 * **Subnet:** subnet-waf
 
-<img src="images/image38.png" style="width:5.4529in;height:6.73748in"/>
+<img src="images/image38.png" style="width:5.45in"/>
 
 **Frontends**
 
@@ -743,7 +755,7 @@ in the subsequent steps.
 * **Public IP**: Create new  
 * **Private IP**: Choose IP in private subnet range (e.g. 10.2.1.10)
 
-<img src="images/image39.png" style="width:6.5in;height:3.48889in"/>
+<img src="images/image39.png" style="width:6.5in"/>
 
 **Backends**
 
@@ -752,7 +764,7 @@ Create new
 * **Name**: apim  
 * **Backend target**: apim-gw.contoso-ov-kitappstreaming.net ← This should be apim-gw.\<your private DNS\>
 
-<img src="images/image40.png" style="width:6.5in;height:2.47361in"/>
+<img src="images/image40.png" style="width:6.5in"/>
 
 **Configuration**
 
@@ -766,7 +778,7 @@ Add new routing rule
   * **Protocol**: http  
   * **Port**: 80
 
-<img src="images/image41.png" style="width:5.37394in;height:4.37436in/>
+<img src="images/image41.png" style="width:5.4in/>
 
 **Backend targets**
 
@@ -782,7 +794,7 @@ Add new routing rule
 
 Example:
 
-<img src="images/image42.png" style="width:4.69972in;height:5.39878in"/>
+<img src="images/image42.png" style="width:4.7in"/>
 
 **Once deployed go to app gateway:**
 
@@ -798,7 +810,7 @@ Click Settings > Health Probe. Click the test and check that it works.
 * Test the probe; it should be successful  
 * Click Add
 
-<img src="images/image43.png" style="width:4.4277in;height:4.24017in"/>
+<img src="images/image43.png" style="width:4.43in"/>
 
 **HTTPS Listener**
 
@@ -818,7 +830,7 @@ Add a new HTTPS listener (optional; adds TLS termination at AppGw)
     * kitstreaming.iai-contoso.com  
     * \*.kitstreaming.iai-contoso.com
 
-<img src="images/image44.png" style="width:5.12834in;height:7.73307in"/>
+<img src="images/image44.png" style="width:5in"/>
 
 
 If it shows “Failed to save application gateway changes”:
@@ -837,7 +849,7 @@ Under Settings > Rules, click + Routing rule
 
 * **Listener**: https	
 
-<img src="images/image45.png" style="width:4.86526in;height:2.22948in"/>
+<img src="images/image45.png" style="width:5in"/>
 
 **Backend pool**	
 
@@ -845,7 +857,7 @@ Under Settings > Rules, click + Routing rule
 
 * **Backend settings**: https-internal
 
-<img src="images/image46.png" style="width:4.84443in;height:4.15683in"/>
+<img src="images/image46.png" style="width:5in"/>
 
 Under Settings > Rules, click `waf-to-apim-internal`
 
@@ -855,9 +867,7 @@ Under Settings > Rules, click `waf-to-apim-internal`
 
 * **Target listener:** https
 
-<img src="images/image47.png" style="width:4.71941in;height:2.7608in"/>
-
-## 
+<img src="images/image47.png" style="width:4.5in"/>
 
 **Post Deployment:**
 
@@ -873,10 +883,10 @@ Assign RBAC permissions to enterprise app registration created by AKS cluster
 
   * Search for the cluster name after selecting Managed Identities and add the managed identity of the AKS cluster
 
-<img src="images/image48.png" style="width:6.5in;height:2.87778in"
+<img src="images/image48.png" style="width:6.5in"
 />
--------------------------------------
-##  3. <a name='OmniverseKitAppStreamingDeploymentandConfiguration'></a>Omniverse Kit App Streaming Deployment and Configuration
+
+## Omniverse Kit App Streaming Deployment and Configuration
 
 In this section the NVIDIA Kit App Streaming stack is deployed and configured on AKS. This includes the steps to
 
@@ -890,7 +900,7 @@ for further details.
 This section follows the installation steps outlined in https://docs.omniverse.nvidia.com/ovas/latest/deployments/infra/installation.html.
 For questions and support please reach out via https://docs.omniverse.nvidia.com/ovas/latest/common/feedback.html
 
-###  3.1. <a name='OptionalMoveExternalDependenciestoyourownartifactstorage'></a>(Optional) Move External Dependencies to your own artifact storage
+### (Optional) Move External Dependencies to your own artifact storage
 
 This installation guide assumes you are sourcing and installing the Kit App Streaming API services with their
 Helm Charts and container images from [NVIDIA NGC](https://ngc.nvidia.com/). Besides this several other public resources
@@ -900,7 +910,7 @@ to access the needed resources.
 
 You can find links and details on the Helm Charts and Images needed in the [NGC Collection for Omniverse Application Streaming API](https://catalog.ngc.nvidia.com/orgs/nvidia/teams/omniverse/collections/kit-appstreaming-collection)
 
-###  3.2. <a name='DownloadSampleandResourcesFiles'></a>Download Sample and Resources Files
+### Download Sample and Resources Files
 
 For installing the needed services, NVIDIA provides sample Helm `values.yaml` files and Custom Resource Definition (CRD)
 files used to configure in later steps the Kit Applications.
@@ -940,7 +950,7 @@ files used to configure in later steps the Kit Applications.
 
 These files are needed in the following steps, and also need to be modified to accommodate your installation environment.
 
-###  3.3. <a name='CreateKubernetesNamespace'></a>Create Kubernetes Namespace
+### Create Kubernetes Namespace
 
 The solution currently requires the creation of one new Kubernetes namespace to deploy various resources. 
 For simplicity, this document assumes the namespace `omni-streaming` is created and used.
@@ -949,7 +959,7 @@ For simplicity, this document assumes the namespace `omni-streaming` is created 
 
 NOTE: Section on Image pull secret 
 
-###  3.4. <a name='CreateImageRegistryPullSecret'></a>Create Image Registry Pull Secret
+### Create Image Registry Pull Secret
 
 During the setup of the pre-requisites, you created a `NGC API TOKEN`. This API token is used by Kubernetes
 during later installation steps to download the necessary images from NGC. In case you want to leverage images copied
@@ -975,7 +985,7 @@ secret/regcred created
 
 ```
 
-###  3.5. <a name='InstallNVIDIAGPUOperatoronAKS'></a>Install NVIDIA GPU Operator on AKS
+### Install NVIDIA GPU Operator on AKS
 
 The [NVIDIA GPU Operator](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/getting-started.html#operator-install-guide) is needed to discover, label and install drivers
 on your NVIDIA GPU K8S Worker nodes.
@@ -1001,7 +1011,7 @@ TEST SUITE: None
 
 ```
 
-###  3.6. <a name='InstallMemcachedonAKS'></a>Install Memcached on AKS
+### Install Memcached on AKS
 
 Memcached is a critical component for enabling fast startup of Kit streaming sessions. 
 It caches shader information that would otherwise need to be compiled at the startup of each container.
@@ -1095,7 +1105,7 @@ Memcached can be accessed via port 11211 on the following DNS name from within y
 ```
 </details>
 
-###  3.7. <a name='InstallFluxonAKS'></a>Install Flux on AKS
+### Install Flux on AKS
 
 The components of the CNCF project Flux are used to manage the deployment of streaming applications. 
 This approach makes the deployment and the management of Helm repositories and the resources more declarative and easier to manage.
@@ -1195,7 +1205,7 @@ TEST SUITE: None
 
 </details>
 
-###  3.8. <a name='InstallOmniverseResourceManagementControlPlaneRMCPonAKS'></a>Install Omniverse Resource Management Control Plane (RMCP) on AKS
+### Install Omniverse Resource Management Control Plane (RMCP) on AKS
 
 The NVIDIA Omniverse Resource Management Control Plane Service is used to manage the deployment of streaming sessions.
 
@@ -1290,11 +1300,9 @@ TEST SUITE: None
 
 </details>
 
--------------------------------------------
+### Create and deploy a custom Omniverse Kit Application
 
-###  3.9. <a name='CreateanddeployacustomOmniverseKitApplication'></a>Create and deploy a custom Omniverse Kit Application
-
-####  3.9.1. <a name='UploadISVcustomkitapptoaContainerRegistry'></a>Upload ISV custom kit app to a Container Registry
+#### Upload ISV custom kit app to a Container Registry
 The containerized kit app needs to be accessible by Kubernetes to provide the OV kit app streaming functionality, hence 
 the ISV needs to use either one of their own existing container registries or create a private Azure Container Registry for this project that holds the containerized ISV Kit App.
 
@@ -1304,7 +1312,7 @@ See [APPLICATION_DEVELOPMENT.md](APPLICATION_DEVELOPMENT.md) to create the requi
 
 Omniverse Kit is a powerful toolkit for developers to build applications, plugins, or microservices for their own ecosystems. In this document, we describe leveraging Omniverse Kit to build a custom rendering application. 
 
-####  3.9.2. <a name='ConfigureISVCustomKitAppforDeployment'></a>*Configure ISV Custom Kit App for Deployment*
+#### *Configure ISV Custom Kit App for Deployment*
 
 This is where you need to set the YAML files values to pull the specific version of the ISV custom kit app previously uploaded to an accessible Container Registry (e.g. private Azure Container Registry in same Resource Group).
 
@@ -1339,11 +1347,11 @@ For the bundled sample kit app the matching configuration values:
     version: '106.1.0',  
     profile: 'azurelb-wss',
 
-###  3.10. <a name='UploadISVcustomkitapptoaContainerRegistry-1'></a>Upload ISV custom kit app to a Container Registry
+### Upload ISV custom kit app to a Container Registry
 
 The containerized kit app needs to be accessible by Kubernetes to provide the OV kit app streaming functionality, hence the ISV needs to use either one of their own existing container registries or create a private Azure Container Registry for this project that holds the containerized ISV Kit App.
 
-####  3.10.1. <a name='CreateAzureContainerRegistryusingtheAzurePortal'></a>*Create Azure Container Registry using the Azure Portal*
+#### *Create Azure Container Registry using the Azure Portal*
 
 **Create a Private Container Registry**
 
@@ -1416,13 +1424,13 @@ Replace \<registry-name\> with the name of your ACR (e.g., "my-container-registr
 $ docker pull <registry-name>.azurecr.io/<image-name>
 ```
 
-###  3.11. <a name='UploadHelmChartsetcfromNGCrecommendation'></a>Upload Helm Charts etc from NGC recommendation
+### Upload Helm Charts etc from NGC recommendation
 
 *Note: Kubernetes containers and Helm charts are retrieved from NGC.* [Omniverse Application Streaming API | NVIDIA NGC](https://catalog.ngc.nvidia.com/orgs/nvidia/teams/omniverse/collections/kit-appstreaming-collection)
 
-###  3.12. <a name='HelmChartDeploymentandConfiguration'></a>Helm Chart Deployment and Configuration
+### Helm Chart Deployment and Configuration
 
-####  3.12.1. <a name='Setenvironment-specificvalues'></a>*Set environment-specific values*
+#### *Set environment-specific values*
 
 At a minimum, the following values need to be changed to suit your environment. Note: Instructions for this are specified in the following steps.
 
@@ -1443,7 +1451,7 @@ host: api.<private DNS zone>
 backend_csp_args.base_domain: <public DNS zone>   
 ```
 
-####  3.12.2. <a name='Internalingresscontrollerhelmnginxingresscontroller'></a>*Internal ingress controller helm nginx ingress controller*
+#### *Internal ingress controller helm nginx ingress controller*
 
 Check `values` file; make sure resource group is correct in annotations. File is located at `helm/nginx-ingress-controller/values-internal.yaml`
 
@@ -1468,42 +1476,7 @@ check output of `kubectl get svc -A`)
   $ kubectl get svc -n nginx-ingress-controller
 ```
 
-####  3.12.3. <a name='FluxCDhelmflux2'></a>*FluxCD helm flux2*
-
-In your flux values file, change `value: system` to `value: <name of your agentpool>`. 
-
-You can find the labels by executing `kubectl get nodes --show-labels | grep agentpool` and looking for the label value.
-
-Execute the following:
-
-```Shell
-$ helm repo add fluxcd-community https://fluxcd-community.github.io/helm-charts
-
-$ helm repo update 
-
-$ helm upgrade --install fluxcd -n omni-system --create-namespace -f helm/flux2/values.yaml fluxcd-community/flux2
-```
-
-####  3.12.4. <a name='GPUOperatorhelmgpuoperator'></a>*GPU Operator helm gpu operator*
-
-Execute the following to deploy the "gpu-operator" helm chart.
-```Shell
-$ helm repo add nvidia https://helm.ngc.nvidia.com/nvidia
-
-$ helm repo update 
-
-$ helm upgrade -i gpu-operator -n gpu-operator --create-namespace -f helm/gpu-operator/values.yaml nvidia/gpu-operator
-```
-
-####  3.12.5. <a name='Memcachedhelmmemcached'></a>*Memcached helm memcached*
-
-Execute the following to deploy the "memcached" helm chart.
-
-```Shell
-$ helm upgrade -i memcached-service-r3 -n omni-streaming --create-namespace bitnami/memcached --version 7.0.2 -f helm/memcached/values.yml
-```
-
-####  3.12.6. <a name='ExternalDNSscriptsexternaldns'></a>*ExternalDNS scripts external dns*
+#### *ExternalDNS scripts external dns*
 
 Create a service principal and assign the correct roles via the first script. Edit the `scripts/external-dns/01-create-sp-for-rbac.sh` file with the desired values:
 
@@ -1570,39 +1543,11 @@ Apply the External DNS Manifest.
 
 ```Shell
 $ kubectl apply -f scripts/external-dns/03-external-dns-manifest.yaml
-``` 
-
-####  3.12.7. <a name='Createrequiredsecrets'></a>*Create required secrets*
-
-Get your NGC API token by visiting `ngc.nvidia.com` and selecting “Setup” near the top-right corner of the webpage.
-
-<img src="images/image50.png" style="width:2.60229in;height:3.07292in" />
-
-```Shell
-export NGC_API_TOKEN=<your-token>
 ```
 
-Create the regcred secret:
-```Shell
-$ kubectl create secret -n omni-streaming docker-registry regcred --docker-server=nvcr.io --docker-username='$oauthtoken' --docker-password=$NGC_API_TOKEN --dry-run=client -o json | kubectl apply -f -
-```
+### Omniverse Kit App Streaming Services
 
-Create the `ngc-omni-user` secret:
-```Shell
-$ kubectl create secret generic -n omni-streaming ngc-omni-user --from-literal=username='$oauthtoken' --from-literal=password="$NGC_API_TOKEN"
-```
-
-Add the required NVIDIA helm repositories:
-
-```Shell
-$ helm repo add omniverse https://helm.ngc.nvidia.com/nvidia/omniverse --username='$oauthtoken' --password=$NGC_API_TOKEN
-
-$ helm repo update
-```
-
-###  3.13. <a name='OmniverseKitAppStreamingServices'></a>Omniverse Kit App Streaming Services
-
-####  3.13.1. <a name='Streaminghelmkitappstreamingmanager'></a>*Streaming helm kit appstreaming manager*
+#### *Streaming helm kit appstreaming manager*
 
 Check `helm/kit-appstreaming-manager/values.yaml` file and update DNS names accordingly:
 
@@ -1612,13 +1557,13 @@ ingress:
   className: internal-nginx... 
 ```
 
-To enable/disable WSS:
+Enable WSS:
 
 ```yaml   
 backend_csp_cls: "nv.svc.streaming._csp.Generic"    
 backend_csp_args:      
-  enable_wss: true    <----- set to true/false to enable/disable WSS.       
-  base_domain: "<public DNS domain>" <--- (Leave blank if disabling WSS)
+  enable_wss: true 
+  base_domain: "<public DNS domain>"
 ```
 
 Deploy `helm/kit-appstreaming-manager` by running:
@@ -1626,7 +1571,7 @@ Deploy `helm/kit-appstreaming-manager` by running:
 $ helm upgrade --install --namespace omni-streaming -f helm/kit-appstreaming-manager/values.yaml streaming omniverse/kit-appstreaming-manager
 ```
 
-####  3.13.2. <a name='Applicationshelmkitappstreamingapplications'></a>*Applications helm kit appstreaming applications*
+#### *Applications helm kit appstreaming applications*
 
 Check `helm/kit-appstreaming-applications/values.yaml` file and update DNS names accordingly:
 
@@ -1641,32 +1586,10 @@ Deploy `helm/kit-appstreaming-applications` by running:
 $ helm upgrade --install --namespace omni-streaming -f helm/kit-appstreaming-applications/values.yaml applications omniverse/kit-appstreaming-applications 
 ```
 
-####  3.13.3. <a name='RMCPhelmkitappstreamingrmcp'></a>*RMCP helm kit appstreaming rmcp*
 
-Check `helm/kit-appstreaming-rmcp/values.yaml` file and update DNS names accordingly.
+#### *Deploy the custom streaming resources manifests omniverse azure*
 
-Change or comment out affinity from system to agentpool
-
-```yaml
-affinity:
-  nodeAffinity:
-    requiredDuringSchedulingIgnoredDuringException:
-      nodeSelectorTerms:
-        - matchExpressions:
-          - key: agentpool
-            operator: In
-            values:
-              - agentpool   <-- this should be <name of your agentpool>
-```
-
-```Shell
-$ helm upgrade --install --namespace omni-streaming -f helm/kit-appstreaming-rmcp/values.yaml rmcp omniverse/kit-appstreaming-rmcp 
-```
-
-
-####  3.13.4. <a name='Deploythecustomstreamingresourcesmanifestsomniverseazure'></a> *Deploy the custom streaming resources manifests omniverse azure*
-
-To enable WSS, open `manifests/omniverse/azure/application-profile-wss.yaml` and edit the following sections listed below:
+Enable WSS, open `manifests/omniverse/azure/application-profile-wss.yaml` and edit the following sections listed below:
 
 ```yaml
 spec:
@@ -1676,46 +1599,18 @@ spec:
     - name: "contoso-application"  <--- Edit the name to reflect the Kit application's name.
     versions:
       - '*'   <--- Edit the versions to reflect which versions are intended to be supported.
-```
-
-Run `kubectl apply -n omni-streaming -f application-profile-wss.yaml`.
-
-Make the following changes in `manifests/omniverse/azure/application-profile-azurelb.yaml`.
-
-```yaml
-metadata:
-  name: <name of application profile>  <--- Edit the name to reflect the desired name of the application profile.
-spec:
-  name: AzureLB example profile
-  description: Default profile - uses an AzureLB per stream
-  supportedApplications:
-    - name: "contoso-application"  <--- Edit the name to reflect the Kit application's name.
-    versions:
-      - '*'   <--- Edit the versions to reflect which versions are intended to be supported.
-
-```
-
-To disable WSS, make the following changes in `manifests/omniverse/azure/application-profile-azurelb.yaml`:
-
-<!-- REPLACED WITH FORMATTED TEXT <img src="images/image54.png" style="width:5in;height:1.08333in" /> -->
-
-```yaml
-envoy:
-  tls:
-    enable: true <---- set this to false
-    secretRef: stream-tls-secret
 ```
 
 Then run: 
 ```Shell
-$ kubectl apply -n omni-streaming -f application-profile-azurelb.yaml
-
 $ kubectl apply -n omni-streaming -f application.yaml
 
 $ kubectl apply -n omni-streaming -f application-version.yaml
+
+$ kubectl apply -n omni-streaming -f application-profile-wss.yaml
 ```
 
-####  3.13.5. <a name='DeployHelmRepositorymanifestshelmrepostiories'></a>*Deploy HelmRepository manifests helm repostiories*
+#### *Deploy HelmRepository manifests helm repostiories*
 
 Execute the following:
 ```Shell
@@ -1723,34 +1618,36 @@ $ kubectl apply -n omni-streaming -f manifests/helm-repositories/ngc-omniverse.y
 ```
 This should (eventually) show `READY: True` in the output of:
 
-<img src="images/image55.png" style="width:6.71875in;height:0.80754in" />
+<img src="images/image55.png" style="width:6.7in" />
 
-####  3.13.6. <a name='CreateprivateDNSrecordforingresscontroller'></a>*Create private DNS record for ingress controller*
+#### *Create private DNS record for ingress controller*
 
 Go to the Private DNS Zone you created. Create the following recordset:
 
-<img src="images/image56.png" style="width:5.0996in;height:7.92837in"
+<img src="images/image56.png" style="width:5in"
 />
 
 [api.contoso-ov-kitappstreaming.net](http://api.ovas-streaming.net/) -> private external ip of ingress controller LB service (e.g. 10.2.0.120 shown below)
 
-<img src="images/image57.png" style="width:6.5in;height:0.60417in" />
+<img src="images/image57.png" style="width:6.5in" />
 
-####  3.13.7. <a name='CreatepublicDNSentryforAppGateway'></a>*Create public DNS entry for App Gateway*
+#### *Create public DNS entry for App Gateway*
 
 Navigate to the Public DNS Zone (ex. kitstreaming.iai-contoso.com) and create an A Recordset that points to the IP address of the Public IP address used in your resource group.
 
-###  3.14. <a name='ValidateOmniverseKitAppStreamingEndPointsviaSwaggerUI'></a>Validate Omniverse Kit App Streaming End Points via Swagger UI
+### Validate Omniverse Kit App Streaming End Points via Swagger UI
 
 Before proceeding with installing web front end, let’s validate the backend services are functioning nominally using the [REST API Documentation Tool | Swagger UI.](https://swagger.io/tools/swagger-ui/)
 
 Using the domain name URL where the Omniverse Kit App Streaming is running, append “/application/docs” or “/streaming/docs” to that URL to get respective Swagger UI web page. 
 👀
-For example, if public domain URL is `https://ignite.streaming.iai-contoso.com`then
+For example, if public domain URL is `https://ignite.streaming.iai-contoso.com` then the Swagger will be at `https://ignite.streaming.iai-contoso.com/streaming`.
 
-* ‘appserver’ = `https://ignite.streaming.iai-contoso.com/applications/docs`
+For the API calls, drop the `/docs` from the URL to test.
 
-* ‘streamingServer’ = `https://ignite.streaming.iai-contoso.com/streaming/docs`
+* ‘appserver’ = `https://ignite.streaming.iai-contoso.com/applications`
+
+* ‘streamingServer’ = `https://ignite.streaming.iai-contoso.com/streaming`
 
 Now validate the backend running using the following steps, in the order presented.
 
@@ -1800,15 +1697,15 @@ Now validate the backend running using the following steps, in the order present
 
    => Verify streaming session no longer listed.
 
-##  4. <a name='ISVWebAppdeployment'></a> ISV Web App deployment
+## ISV Web App deployment
 
 An opinionated example web app is provided for reference as a starting point; with ISV developers expected and encouraged to further customize these examples for their own use cases. This section expands on the ISV Web App portion of the overall architecture diagram.
 
-<img src="images/image58.png" style="height:2.46356in" />
+<img src="images/image58.png" style="width:5in" />
 
 See [APPLICATION_DEVELOPMENT.md](APPLICATION_DEVELOPMENT.md) to create the web app.
 
-###  4.1. <a name='DeployingWebClientApplicationinAzure'></a>Deploying Web Client Application in Azure
+### Deploying Web Client Application in Azure
 
 This section focuses on installing and deploying the bundled sample web client front-end.  See  [APPLICATION_DEVELOPMENT.md](APPLICATION_DEVELOPMENT.md) for information on developing this custom ISV web client sample.  For the purposes of this sample, presume that the web client is going to be deployed as an Azure Static Web App (the ‘www’ icon in above diagram).
 
@@ -1830,9 +1727,9 @@ In the web-app folder there is a .env file at the root and authConfig.tsx in src
 <img src="images/image60.png" style="max-width:100%" />
 
 
-###  4.2. <a name='PowerBIReactComponentConfiguration'></a> Power BI React Component Configuration
+### Power BI React Component Configuration
 
-####  4.2.1. <a name='AzureAppsRegistration'></a> *Azure Apps Registration*
+#### *Azure Apps Registration*
 
 Add permissions (admin consent not required) required to allow associated services access.
 
@@ -1855,7 +1752,7 @@ Add permissions (admin consent not required) required to allow associated servic
 
 Note: Resulting value from scope *'[https://analysis.windows.net/powerbi/api/Report.Read.All](https://analysis.windows.net/powerbi/api/Report.Read.All)'*  and *activeAccount* used to retrieve JWT token with PowerBI scope given from appregistration.
 
-####  4.2.2. <a name='PowerBIWorkspaceSettings'></a>*Power BI Workspace Settings*
+#### *Power BI Workspace Settings*
 
 Ensure that in Power BI Workspace Settings the License Info \-\> License Configuration has been assigned for this Azure tenant.
 
@@ -1865,7 +1762,7 @@ Ensure that in Power BI Workspace Settings the License Info \-\> License Configu
 
 * Semantic model storage format: **Small semantic model storage format**
 
-####  4.2.3. <a name='PowerBIDataConnections'></a>*Power BI Data Connections*
+#### *Power BI Data Connections*
 
 Within Power BI workspace connects Power BI custom report to two Azure Data Explorer (ADX) datasets: *digital\_twins*, and *FluidCell*. 
 
@@ -1906,7 +1803,7 @@ Once everything is setup correctly meshes or group of meshes with *asset_id* par
 
 <img src="images/image63.png" style="max-width:100%" />
 
-####  4.2.4. <a name='EventHubs'></a>*Event Hubs*
+#### *Event Hubs*
 
 Add role assignments to the Event Hubs Namespace and Event Hub itself via Access Control (IAM):
 
@@ -1915,7 +1812,7 @@ Add role assignments to the Event Hubs Namespace and Event Hub itself via Access
 * Azure Events Hub Data Sender
 
 
-###  4.3. <a name='EventHubReactComponentConfiguration'></a>Event Hub React Component Configuration
+### Event Hub React Component Configuration
 
 At the top of the screen selected Event Hub stream values received from the Azure IoT Operations are being updated.  This is configured via the *.env* paramaters values:
 
@@ -1935,13 +1832,13 @@ To use the event data inside the 3D viewport the global state must be updated. W
 
 For a more general tutorial on how to does this, please see [Send or receive events using JavaScript \- Azure Event Hubs | Microsoft Learn](https://learn.microsoft.com/en-us/azure/event-hubs/event-hubs-node-get-started-send?tabs=passwordless%2Croles-azure-portal)
 
-###  4.4. <a name='AzureStaticWebApplicationDeployment'></a>Azure Static Web Application Deployment
+### Azure Static Web Application Deployment
 
 The web-app sub-folder in the GitHub repo includes everything in ISV Web App, including Power BI component, Redux component, and 3D Viewport Component.  The Power BI React Component provides the integration between Power BI Reports and the Redux based global state manager via Redux Slices and Reducers.  The 3D Viewport Component encapsulates the Omniverse Streaming functionality and likewise provides the integration with the Redux global state manager via Slices and Reducers. 
 
 See [APPLICATION_DEVELOPMENT.md](APPLICATION_DEVELOPMENT.md) to create the web-app.
 
-####  4.4.1. <a name='DeployingaReactApptoAzureStaticWebAppsusingAzurePortal'></a> *Deploying a React App to Azure Static Web Apps using Azure Portal*
+#### *Deploying a React App to Azure Static Web Apps using Azure Portal*
 
 ##### Create a New Azure Static Web App
 
