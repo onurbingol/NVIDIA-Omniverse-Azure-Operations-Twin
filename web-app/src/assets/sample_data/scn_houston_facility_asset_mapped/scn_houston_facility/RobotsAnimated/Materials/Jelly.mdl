@@ -1,0 +1,334 @@
+/*****************************************************************************
+*     Copyright 2023 NVIDIA Corporation. All rights reserved.
+******************************************************************************
+
+ MDL MATERIALS ARE PROVIDED PURSUANT TO AN END USER LICENSE  AGREEMENT,
+ WHICH WAS ACCEPTED IN ORDER TO GAIN ACCESS TO THIS FILE.  IN PARTICULAR, 
+ THE MDL MATERIALS ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTIES OF
+ MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT OF 
+ COPYRIGHT, PATENT, TRADEMARK, OR OTHER RIGHT. IN NO EVENT SHALL NVIDIA
+ CORPORATION BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, INCLUDING
+ ANY GENERAL, SPECIAL,  INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES, 
+ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF 
+ THE USE OR INABILITY TO USE THE MDL MATERIALS OR FROM OTHER DEALINGS IN 
+ THE MDL MATERIALS.
+*/
+
+
+
+mdl 1.4;
+import ::df::*;
+import ::tex::*;
+import ::math::*;
+import ::anno::*;
+import ::state::*;
+import ::base::*;
+import ::nvidia::core_definitions::dimension;
+
+
+const string COPYRIGHT = 
+" Copyright 2023 NVIDIA Corporation. All rights reserved.\n"
+" MDL MATERIALS ARE PROVIDED PURSUANT TO AN END USER LICENSE  AGREEMENT,\n"
+" WHICH WAS ACCEPTED IN ORDER TO GAIN ACCESS TO THIS FILE.  IN PARTICULAR,\n" 
+" THE MDL MATERIALS ARE PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND,\n"
+" EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTIES OF\n"
+" MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT OF\n" 
+" COPYRIGHT, PATENT, TRADEMARK, OR OTHER RIGHT. IN NO EVENT SHALL NVIDIA\n"
+" CORPORATION BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, INCLUDING ANY\n"
+" GENERAL, SPECIAL,  INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES, WHETHER IN\n"
+" AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF THE USE OR\n"
+" INABILITY TO USE THE MDL MATERIALS OR FROM OTHER DEALINGS IN THE MDL MATERIALS.\n";
+
+
+uniform float4x4 rotation_translation_scale(
+    uniform float3 rotation = float3(0.)
+        [[ ::anno::description("Rotation applied to every UVW coordinate") ]],
+    uniform float3 translation = float3(0.)
+        [[ ::anno::description("Offset applied to every UVW coordinate") ]],
+    uniform float3 scaling = float3(1.)
+        [[ ::anno::description("Scale applied to every UVW coordinate") ]]
+)
+[[
+    ::anno::description("Construct transformation matrix from Euler rotation, translation and scale"),
+    ::anno::hidden()
+]]
+{
+    float4x4 scale =
+        float4x4(scaling.x        , 0.               , 0.               , 0.,
+                 0.               , scaling.y        , 0.               , 0.,
+                 0.               , 0.               , scaling.z        , 0.,
+                 translation.x, translation.y, translation.z, 1.);
+
+    float3 s = ::math::sin(rotation);
+    float3 c = ::math::cos(rotation);
+    float4x4 rotate =
+        float4x4(  c.y*c.z ,  -c.x*s.z + s.x*s.y*c.z ,  s.x*s.z + c.x*s.y*c.z , 0.0,
+                   c.y*s.z ,   c.x*c.z + s.x*s.y*s.z , -s.x*c.z + c.x*s.y*s.z , 0.0,
+                  -s.y     ,   s.x*c.y               ,  c.x*c.y               , 0.0,
+                   0.     ,   0                   ,  0                   , 1.);
+
+    return   scale*rotate;
+}
+
+export material Jelly(
+	color jelly_color	= color(0.8665, 0.7769, 0.1559)
+	[[
+        ::anno::display_name("Jelly Color"),
+        ::anno::description("The color of the jelly material"),
+		::anno::in_group("Appearance")
+    ]],	
+	float jelly_roughness 		= 0.25
+	[[
+        ::anno::display_name("Roughness"),
+        ::anno::description("The roughness of the jelly material"),
+		::anno::in_group("Appearance")
+    ]],
+	bool enable_roughness_texture = true
+	[[
+        ::anno::display_name("Enable Roughness Texture"),
+        ::anno::description("Will read roughness value from a texture that gives more variation"),
+		::anno::in_group("Appearance")
+    ]],	
+	float distance_scale 	= .03
+	[[
+        ::anno::display_name("Distance Scale"),
+        ::anno::description("If the material looks 'wrong', the material is probably viewed with incorrect units. If it is too transparent, decrease the value by a factor of 10, if necessary multiple times to achieve the desired result. If it is too dark (or black), increase this value by factors of 10."),
+		::anno::in_group("Appearance")
+    ]],	
+	uniform float bump_amount		= 1.0
+	[[
+        ::anno::display_name("Bump Amount"),
+        ::anno::description("The amount of the bump of the jelly material"),
+		::anno::in_group("Appearance")
+    ]],	
+	
+	// Adjustments Group
+	uniform float2 texture_translate =  float2(0.0f)
+	[[
+		::anno::display_name("Translate"),
+		::anno::description("Controls the position of the texture."),
+		::anno::in_group("Adjustments")
+	]],
+	uniform float texture_rotate =  0.f
+	[[
+		::anno::display_name("Rotate"),
+		::anno::description("Rotates angle of the texture in degrees."),
+		::anno::in_group("Adjustments")
+	]],
+	uniform float2 texture_scale =  float2(1.0f)
+	[[
+		::anno::display_name("Scale"),
+		::anno::description("Larger numbers increase the size."),
+		::nvidia::core_definitions::dimension(float2(.1f, .1f)),
+		::anno::in_group("Adjustments")
+	]]
+) 
+[[
+	::anno::author("NVIDIA vMaterials"),
+    ::anno::display_name("Jelly"),
+    ::anno::description("Jelly material that also computes volumetric scattering of the jelly material. Make sure to use the correct scene units for jelly material to render correctly. If the material appears black or transluscent, check your modeling scale or compensate using the 'Distance Scale' parameter."),
+	::anno::key_words(string[]("jelly", "food", "transparent", "gummy")),
+	::anno::thumbnail("./.thumbs/Jelly.Jelly.png"),
+	::anno::copyright_notice(COPYRIGHT),
+	::anno::hidden()
+]] = let
+{
+	// constants
+	color scattering 		= color(.5);
+	float directional_bias 	= 0.0;
+	uniform float ior 		= 1.35;
+	
+	// textures
+	texture_2d jelly_normal = texture_2d("../Textures/jelly_normal.jpg", ::tex::gamma_linear);
+	texture_2d roughness_tex = texture_2d("../Textures/jelly_roughness.jpg", ::tex::gamma_srgb);
+
+	
+	
+	::base::texture_coordinate_info uvw = ::base::coordinate_source(
+								coordinate_system: ::base::texture_coordinate_uvw,
+								texture_space: 0
+	);
+	
+	::base::texture_coordinate_info  transformed_uvw =  ::base::transform_coordinate(
+								transform: rotation_translation_scale(
+									scaling: float3(texture_scale.x, texture_scale.y, 1.0),
+									rotation: float3(0.0, 0.0, texture_rotate/180.*::math::PI ),
+									translation: float3(texture_translate.x, texture_translate.y, 0.0)
+								),
+								coordinate: uvw
+	);
+	
+	float jelly_roughness_lookup = enable_roughness_texture ? ::base::file_texture(
+							texture: roughness_tex,
+							color_offset: color(0.0),
+							color_scale: color(jelly_roughness * 4.0),
+							mono_source: ::base::mono_average,
+							uvw: transformed_uvw,
+							clip: false		
+						).mono : jelly_roughness * 0.6;
+
+	
+	bsdf diffuse = ::df::diffuse_reflection_bsdf(
+		tint: jelly_color
+	);
+	
+	bsdf surface = ::df::simple_glossy_bsdf(
+			//roughness_u: 	roughness*roughness,
+			roughness_u: 	jelly_roughness_lookup*jelly_roughness_lookup,
+            tint: 			color (1.0),
+			mode: 			::df::scatter_reflect_transmit
+    );
+	
+
+	
+	bsdf surface_final = ::df::weighted_layer(
+		base: surface,
+		layer: diffuse,
+		weight: 0.03
+	);
+	
+	// Normal lookup
+	float3 the_normal = ::base::tangent_space_normal_texture(
+											texture: 		jelly_normal,
+											factor:         bump_amount,
+											uvw:            transformed_uvw,
+											flip_tangent_u: false,
+											flip_tangent_v: false
+	);
+}
+in material (
+	ior: color(ior),
+    surface: material_surface (
+        scattering: surface_final
+    ),
+	volume:  material_volume (
+		scattering: ::df::anisotropic_vdf(
+			directional_bias: directional_bias 
+		),
+		absorption_coefficient: (distance_scale <= 0)? color(0): ::math::log(jelly_color) / -distance_scale,
+		scattering_coefficient: (distance_scale <= 0)? color(0): ::math::log(scattering) / -distance_scale
+	),
+	geometry: material_geometry(
+		normal: the_normal
+	)
+);
+
+
+
+
+
+
+// 01 Jelly - Red Strawberry
+export material Jelly_Dark_Red_Raspberry(*)
+[[
+	::anno::author("NVIDIA ARC"),
+    ::anno::display_name("Jelly - Dark Red Raspberry"),
+    ::anno::description("Jelly material that also computes volumetric scattering of the jelly material. Make sure to use the correct scene units for jelly material to render correctly. If the material appears black or transluscent, check your modeling scale or compensate using the 'Distance Scale' parameter."),
+	::anno::key_words(string[]("jelly", "food", "transparent", "gummy", "raspberry", "red", "dark")),
+	::anno::thumbnail("./.thumbs/Jelly.Jelly_Dark_Red_Raspberry.png"),
+	::anno::copyright_notice(COPYRIGHT)	
+]]
+ = Jelly(
+	jelly_color:			color(0.523443, 0.003697, 0.016988),
+	jelly_roughness:		0.3,		
+	enable_roughness_texture: true,
+	distance_scale:			0.009,	
+	bump_amount:			1.0
+ );
+ 
+ 
+// 02 Jelly Red Raspberry
+export material Jelly_Red_Strawberry(*)
+[[
+	::anno::author("NVIDIA ARC"),
+    ::anno::display_name("Jelly - Red Strawberry"),
+    ::anno::description("Jelly material that also computes volumetric scattering of the jelly material. Make sure to use the correct scene units for jelly material to render correctly. If the material appears black or transluscent, check your modeling scale or compensate using the 'Distance Scale' parameter."),
+	::anno::key_words(string[]("jelly", "food", "transparent", "gummy", "strawberry", "red")),
+	::anno::thumbnail("./.thumbs/Jelly.Jelly_Red_Strawberry.png"),
+	::anno::copyright_notice(COPYRIGHT)	
+]]
+ = Jelly(
+	jelly_color:			color(0.812241, 0.006585, 0.024223),
+	jelly_roughness:		0.3,		
+	enable_roughness_texture: true,
+	distance_scale:			0.015,	
+	bump_amount:			1.0
+ );
+ 
+ 
+// 03 Jelly Orange
+export material Jelly_Red_Orange(*)
+[[
+	::anno::author("NVIDIA ARC"),
+    ::anno::display_name("Jelly - Orange"),
+    ::anno::description("Jelly material that also computes volumetric scattering of the jelly material. Make sure to use the correct scene units for jelly material to render correctly. If the material appears black or transluscent, check your modeling scale or compensate using the 'Distance Scale' parameter."),
+	::anno::key_words(string[]("jelly", "food", "transparent", "gummy", "orange")),
+	::anno::thumbnail("./.thumbs/Jelly.Jelly_Red_Orange.png"),
+	::anno::copyright_notice(COPYRIGHT)	
+]]
+ = Jelly(
+	jelly_color:			color(0.932277, 0.315763, 0.009696),
+	jelly_roughness:		0.3,		
+	enable_roughness_texture: true,
+	distance_scale:			0.015,	
+	bump_amount:			1.0
+ );
+ 
+ 
+// 04 Jelly Yellow Lemon
+export material Jelly_Yellow_Lemon(*)
+[[
+	::anno::author("NVIDIA ARC"),
+    ::anno::display_name("Jelly - Yellow Lemon"),
+    ::anno::description("Jelly material that also computes volumetric scattering of the jelly material. Make sure to use the correct scene units for jelly material to render correctly. If the material appears black or transluscent, check your modeling scale or compensate using the 'Distance Scale' parameter."),
+	::anno::key_words(string[]("jelly", "food", "transparent", "gummy", "lemon", "yellow")),
+	::anno::thumbnail("./.thumbs/Jelly.Jelly_Yellow_Lemon.png"),
+	::anno::copyright_notice(COPYRIGHT)	
+]]
+ = Jelly(
+	jelly_color:			color(0.932277,0.625345, 0.009696),
+	jelly_roughness:		0.3,		
+	enable_roughness_texture: true,
+	distance_scale:			0.015,	
+	bump_amount:			1.0
+ );
+
+ 
+// 05 Jelly White Pineapple
+export material Jelly_White_Pineapple(*)
+[[
+	::anno::author("NVIDIA ARC"),
+    ::anno::display_name("Jelly - White Pineapple"),
+    ::anno::description("Jelly material that also computes volumetric scattering of the jelly material. Make sure to use the correct scene units for jelly material to render correctly. If the material appears black or transluscent, check your modeling scale or compensate using the 'Distance Scale' parameter."),
+	::anno::key_words(string[]("jelly", "food", "transparent", "gummy", "pineapple", "white")),
+	::anno::thumbnail("./.thumbs/Jelly.Jelly_White_Pineapple.png"),
+	::anno::copyright_notice(COPYRIGHT)	
+]]
+ = Jelly(
+	jelly_color:			color(0.701170, 0.618686, 0.373615),
+	jelly_roughness:		0.3,		
+	enable_roughness_texture: true,
+	distance_scale:			0.015,	
+	bump_amount:			1.0
+ );
+ 
+ 
+// 06 Jelly Green Apple
+export material Jelly_Green_Apple(*)
+[[
+	::anno::author("NVIDIA ARC"),
+    ::anno::display_name("Jelly - Green Apple"),
+    ::anno::description("Jelly material that also computes volumetric scattering of the jelly material. Make sure to use the correct scene units for jelly material to render correctly. If the material appears black or transluscent, check your modeling scale or compensate using the 'Distance Scale' parameter."),
+	::anno::key_words(string[]("jelly", "food", "transparent", "gummy", "apple", "green")),
+	::anno::thumbnail("./.thumbs/Jelly.Jelly_Green_Apple.png"),
+	::anno::copyright_notice(COPYRIGHT)	
+]]
+ = Jelly(
+	jelly_color:			color(0.166872, 0.358654, 0.012664),
+	jelly_roughness:		0.3,		
+	enable_roughness_texture: true,
+	distance_scale:			0.015,	
+	bump_amount:			1.0
+ );
+

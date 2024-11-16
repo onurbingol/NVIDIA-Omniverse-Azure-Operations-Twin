@@ -1,0 +1,398 @@
+/******************************************************************************
+ *	 Copyright 2023 NVIDIA Corporation. All rights reserved.	 *
+ ******************************************************************************
+
+Permission is hereby granted by NVIDIA Corporation ("NVIDIA"), free of charge,
+to any person obtaining a copy of the sample definition code that uses our
+Material Definition Language (the "MDL Materials"), to reproduce and distribute
+the MDL Materials, including without limitation the rights to use, copy, merge,
+publish, distribute, and sell modified and unmodified copies of the MDL
+Materials, and to permit persons to whom the MDL Materials is furnished to do
+so, in all cases solely for use with NVIDIA's Material Definition Language,
+subject to the following further conditions:
+
+1. The above copyright notices, this list of conditions, and the disclaimer
+that follows shall be retained in all copies of one or more of the MDL
+Materials, including in any software with which the MDL Materials are bundled,
+redistributed, and/or sold, and included either as stand-alone text files,
+human-readable headers or in the appropriate machine-readable metadata fields
+within text or binary files as long as those fields can be easily viewed by the
+user, as applicable.
+2. The name of NVIDIA shall not be used to promote, endorse or advertise any
+Modified Version without specific prior written permission, except a) to comply
+ with the notice requirements otherwise contained herein; or b) to acknowledge
+the contribution(s) of NVIDIA.
+
+THE MDL MATERIALS ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT OF COPYRIGHT, PATENT,
+TRADEMARK, OR OTHER RIGHT. IN NO EVENT SHALL NVIDIA CORPORATION BE LIABLE FOR
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, INCLUDING ANY GENERAL, SPECIAL,
+INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF THE USE OR INABILITY TO USE
+THE MDL MATERIALS OR FROM OTHER DEALINGS IN THE MDL MATERIALS.
+*/
+
+
+mdl 1.7;
+
+import ::anno::*;
+import ::base::*;
+import ::df::*;
+import ::math::*;
+import ::state::*;
+import ::tex::*;
+import ::nvidia::core_definitions::blend_colors;
+import ::nvidia::core_definitions::dimension;
+
+
+const string COPYRIGHT =
+" Copyright 2023 NVIDIA Corporation. All rights reserved.\n"
+" MDL MATERIALS ARE PROVIDED PURSUANT TO AN END USER LICENSE  AGREEMENT,\n"
+" WHICH WAS ACCEPTED IN ORDER TO GAIN ACCESS TO THIS FILE.  IN PARTICULAR,\n"
+" THE MDL MATERIALS ARE PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND,\n"
+" EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTIES OF\n"
+" MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT OF\n"
+" COPYRIGHT, PATENT, TRADEMARK, OR OTHER RIGHT. IN NO EVENT SHALL NVIDIA\n"
+" CORPORATION BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, INCLUDING ANY\n"
+" GENERAL, SPECIAL,  INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES, WHETHER IN\n"
+" AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF THE USE OR\n"
+" INABILITY TO USE THE MDL MATERIALS OR FROM OTHER DEALINGS IN THE MDL MATERIALS.\n";
+
+const string DESCRIPTION = "A retroreflective tape material that is able to backscatter light towards the lightsource. "
+						"Useful for marking areas that require special attention, especially in dark situations";
+
+float overlay(float base, float layer, float weight)
+{
+	return base + (1.0f - base) * layer * weight;
+}
+
+float3 normalmap_normal(
+	uniform texture_2d texture,
+	float factor = 1.0,
+	::base::texture_coordinate_info uvw = ::base::texture_coordinate_info()
+)
+{
+	float3 lookup = (::tex::lookup_float3(texture, float2(uvw.position.x, uvw.position.y)) - float3(0.5)) * (factor * 2.0);
+	return ::math::normalize(uvw.tangent_u * lookup.x + uvw.tangent_v * lookup.y + ::state::normal() * (lookup.z + (1.0 - factor)));
+}
+
+
+::base::texture_coordinate_info transform_coordinate_2(
+    float4x4 transform                                         
+        [[ ::anno::description("A transformation to be applied to the source coordinates. rotation_translation_scale() is a suggested means to compute the transformation matrix") ]],
+    ::base::texture_coordinate_info coordinate = ::base::texture_coordinate_info()
+        [[ ::anno::description("Coordinate, typically sourced from coordinate_source or coordinate_projection") ]]
+) [[ 
+    ::anno::description("Transform a texture coordinate by a matrix") ,
+    ::anno::noinline()
+  ]]
+{
+
+	// Version 2
+	float4 r_position = transform * float4(coordinate.position.x,coordinate.position.y,coordinate.position.z,1);
+	float4 u = transform[0];
+	float3 ru = ::math::normalize(float3(u.x,u.y,u.z));
+	float cos =  ru.x; 
+	float sin =  -ru.y;
+	
+    return ::base::texture_coordinate_info(
+        float3(r_position.x,r_position.y,r_position.z),
+		::math::normalize(cos * coordinate.tangent_u - sin * coordinate.tangent_v),
+		::math::normalize(cos * coordinate.tangent_v + sin * coordinate.tangent_u));
+}
+
+
+// Takes the standard input that every material has. It combines a couple of
+// functions in one convenience function.
+::base::texture_coordinate_info vmat_transform(
+								float2 translation = float2(0.0, 0.0),
+								float rotation     = 0.0,				// rotation in degrees
+								float2 scaling     = float2(1.0, 1.0),
+								uniform ::base::texture_coordinate_system system = ::base::texture_coordinate_uvw,
+								uniform int uv_space       = 0
+)
+{
+	float rotation_rad = (rotation * 3.1415926535897932384626433832f) / 180.f;
+	float4x4 scale =
+	float4x4(1.0 /scaling.x, 0.             ,  0. ,     0.,
+			 0.            , 1.0 /scaling.y ,  0. ,     0.,
+			 0.            , 0.             ,  1.0,     0.,
+			 translation.x , translation.y  ,  0.0,     1.);
+
+    float s = ::math::sin(rotation_rad);
+    float c = ::math::cos(rotation_rad);
+    float4x4 rotate =
+	float4x4(  c  ,  -s   , 0.0 , 0.0,
+			   s  ,   c   , 0.0 , 0.0,
+			   0.0,   0.0 , 1.0 , 0.0,
+			   0. ,   0.0 , 0.0 , 1.);
+	
+	return transform_coordinate_2(scale*rotate, ::base::coordinate_source(system, uv_space));
+}
+
+::base::texture_coordinate_info vmat_transform_post_scale(
+	::base::texture_coordinate_info uvw,
+	float2 scale = float2(1.0f)
+)
+{
+	return ::base::texture_coordinate_info(
+		position: float3(uvw.position.x / scale.x,
+						uvw.position.y / scale.y,
+						uvw.position.z),
+		tangent_u: uvw.tangent_u,
+		tangent_v: uvw.tangent_v
+	);
+}
+
+export material Retroreflective_Material(
+    color material_color = color(0.223228f, 0.223228f, 0.223228f) [[
+        ::anno::description("The color of the retroreflective print"),
+        ::anno::display_name("Material Color"),
+        ::anno::in_group("Appearance"),
+        ::anno::ui_order(0)
+    ]],
+    color retroreflective_tint = color(1.f, 1.f, 1.f) [[
+        ::anno::description("Tints the color of the retroreflection. Leave it bright, so the material keeps reflecting enough light."),
+        ::anno::display_name("Retroreflection Color"),
+        ::anno::in_group("Appearance"),
+        ::anno::ui_order(1)
+    ]],
+    float retroreflection_roughness = 0.2f [[
+        ::anno::description("Spreads the angle of retroreflection which also comes with a reduction of intensity."),
+        ::anno::display_name("Retroreflection Roughness"),
+        ::anno::in_group("Appearance"),
+        ::anno::hard_range(0.f, 1.f),
+        ::anno::ui_order(2)
+    ]],
+    float smudges_amount = 0.0f [[
+        ::anno::description("Add surface variation to the material to make the material appear to have been used before."),
+        ::anno::display_name("Smudges"),
+        ::anno::in_group("Appearance"),
+        ::anno::hard_range(0.f, 1.f),
+        ::anno::ui_order(3)
+    ]],
+    float roughness = 0.69f [[
+        ::anno::description("Higher roughness values lead to bigger highlights and blurrier reflections."),
+        ::anno::display_name("Roughness"),
+        ::anno::in_group("Appearance"),
+        ::anno::hard_range(0.f, 1.f),
+        ::anno::ui_order(4)
+    ]],
+    float bump_strength = 0.1f [[
+        ::anno::description("Specifies the strength of the bump."),
+        ::anno::display_name("Bump Strength"),
+        ::anno::in_group("Appearance"),
+        ::anno::hard_range(0.f, 1.f),
+        ::anno::ui_order(5)
+    ]],
+    float2 texture_translate = float2(0.f) [[
+        ::anno::description("Controls the position of the texture."),
+        ::anno::display_name("Texture Translate"),
+        ::anno::in_group("Transform"),
+        ::anno::ui_order(6)
+    ]],
+    float texture_rotate = 0.f [[
+        ::anno::description("Rotates angle of the texture in degrees."),
+        ::anno::display_name("Texture Rotate"),
+        ::anno::in_group("Transform"),
+        ::anno::soft_range(0.f, 360.f),
+        ::anno::ui_order(7)
+    ]],
+    float2 texture_scale = float2(1.f) [[
+        ::anno::description("Larger numbers increase the size."),
+        ::anno::display_name("Texture Scale"),
+        ::anno::in_group("Transform"),
+		::nvidia::core_definitions::dimension(float2(1.0f, 1.0f)),
+        ::anno::ui_order(8)
+    ]],
+    uniform int uv_space_index = 0 [[
+        ::anno::description("Uses selected UV space for material."),
+        ::anno::display_name("UV Space Index"),
+        ::anno::in_group("Transform"),
+        ::anno::ui_order(9)
+    ]])
+[[
+        ::anno::display_name("Retroreflective Material - Gray New"),
+	    ::anno::author("Nvidia vMaterials"),
+        ::anno::description(DESCRIPTION),
+	    ::anno::contributor("Maik Rohland"),
+	    ::anno::contributor("Ruediger Raab"),
+	    ::anno::copyright_notice(COPYRIGHT),
+		::anno::thumbnail("./.thumbs/Retroreflective_Material.Retroreflective_Material.png"),
+        ::anno::key_words(string[]("foil", "plastic", "new", "construction", "safety", "automotive", "retroreflective", "reflective", "interior", "exterior", "smooth", "gray", "neutral"))
+]]
+ = 
+    let {
+        bool tmp0 = false;
+		float2 texture_rescale = texture_scale * 0.5f;
+        material_surface tmp1(::df::custom_curve_layer(0.0799999982f, 1.f, 4.38000011f, 1.f, ::df::microfacet_ggx_smith_bsdf(overlay(::math::lerp(0.f, 0.639999986f, roughness), ::math::pow(::base::file_texture(texture_2d("../Textures/smudges_retro_paint.jpg", ::tex::gamma_linear), color(0.f, 0.f, 0.f), color(1.f, 1.f, 1.f), ::base::mono_average, vmat_transform(texture_translate, texture_rotate, texture_rescale, ::base::texture_coordinate_uvw, uv_space_index), float2(0.f, 1.f), float2(0.f, 1.f), ::tex::wrap_repeat, ::tex::wrap_repeat, false, 0.f, int2(0), ::tex::wrap_repeat, 30.f).mono, 0.620000005f), smudges_amount) * overlay(::math::lerp(0.f, 0.639999986f, roughness), ::math::pow(::base::file_texture(texture_2d("../Textures/smudges_retro_paint.jpg", ::tex::gamma_linear), color(0.f, 0.f, 0.f), color(1.f, 1.f, 1.f), ::base::mono_average, vmat_transform(texture_translate, texture_rotate, texture_rescale, ::base::texture_coordinate_uvw, uv_space_index), float2(0.f, 1.f), float2(0.f, 1.f), ::tex::wrap_repeat, ::tex::wrap_repeat, false, 0.f, int2(0), ::tex::wrap_repeat, 30.f).mono, 0.620000005f), smudges_amount), overlay(::math::lerp(0.f, 0.639999986f, roughness), ::math::pow(::base::file_texture(texture_2d("../Textures/smudges_retro_paint.jpg", ::tex::gamma_linear), color(0.f, 0.f, 0.f), color(1.f, 1.f, 1.f), ::base::mono_average, vmat_transform(texture_translate, texture_rotate, texture_rescale, ::base::texture_coordinate_uvw, uv_space_index), float2(0.f, 1.f), float2(0.f, 1.f), ::tex::wrap_repeat, ::tex::wrap_repeat, false, 0.f, int2(0), ::tex::wrap_repeat, 30.f).mono, 0.620000005f), smudges_amount) * overlay(::math::lerp(0.f, 0.639999986f, roughness), ::math::pow(::base::file_texture(texture_2d("../Textures/smudges_retro_paint.jpg", ::tex::gamma_linear), color(0.f, 0.f, 0.f), color(1.f, 1.f, 1.f), ::base::mono_average, vmat_transform(texture_translate, texture_rotate, texture_rescale, ::base::texture_coordinate_uvw, uv_space_index), float2(0.f, 1.f), float2(0.f, 1.f), ::tex::wrap_repeat, ::tex::wrap_repeat, false, 0.f, int2(0), ::tex::wrap_repeat, 30.f).mono, 0.620000005f), smudges_amount), color(1.f, 1.f, 1.f), color(1.f, 1.f, 1.f), ::state::texture_tangent_u(0), ::df::scatter_reflect), ::df::weighted_layer(0.319999993f, ::df::custom_curve_layer(0.f, 1.f, 1.29999995f, 1.f, ::df::diffuse_reflection_bsdf(material_color, 1.f), ::df::backscattering_glossy_reflection_bsdf((retroreflection_roughness * 0.25f + 0.199999988f) * (retroreflection_roughness * 0.25f + 0.199999988f), (retroreflection_roughness * 0.25f + 0.199999988f) * (retroreflection_roughness * 0.25f + 0.199999988f), nvidia::core_definitions::blend_colors(::base::file_texture(texture_2d("../Textures/glitter_noise_1k.png", ::tex::gamma_linear), color(0.f, 0.f, 0.f), color(1.f, 1.f, 1.f), ::base::mono_average, vmat_transform(texture_translate, texture_rotate, texture_rescale, ::base::texture_coordinate_uvw, uv_space_index), float2(0.f, 1.f), float2(0.f, 1.f), ::tex::wrap_repeat, ::tex::wrap_repeat, false, 0.f, int2(0), ::tex::wrap_repeat, 30.f).tint, retroreflective_tint, ::base::color_layer_multiply, 1.f, true).tint, color(0.f, 0.f, 0.f), ::state::texture_tangent_u(0)), ::state::normal()), ::df::diffuse_reflection_bsdf(material_color, 1.f), ::state::normal()), ::state::normal()), material_emission(emission: edf(), intensity: color(0.f, 0.f, 0.f), mode: intensity_radiant_exitance));
+        material_surface tmp2 = material_surface(scattering: bsdf(), emission: material_emission(emission: edf(), intensity: color(0.f, 0.f, 0.f), mode: intensity_radiant_exitance));
+        color tmp3 = color(1.f, 1.f, 1.f);
+        material_volume tmp4 = material_volume(scattering: vdf(), absorption_coefficient: color(0.f, 0.f, 0.f), scattering_coefficient: color(0.f, 0.f, 0.f), emission_intensity: color(0.f, 0.f, 0.f));
+        material_geometry tmp5(float3(0.f), 1.f, normalmap_normal(texture_2d("../Textures/tape_patterns_norm.jpg", ::tex::gamma_linear), bump_strength, vmat_transform_post_scale(vmat_transform(texture_translate, texture_rotate, texture_rescale, ::base::texture_coordinate_uvw, uv_space_index), float2(0.100000001f))));
+        hair_bsdf tmp6 = hair_bsdf();
+    } in
+        material(
+            thin_walled: tmp0,
+            surface: tmp1,
+            backface: tmp2,
+            ior: tmp3,
+            volume: tmp4,
+            geometry: tmp5,
+            hair: tmp6);
+
+
+// 2
+export material Retroreflective_Material_Gray_Worn(*)
+[[
+        ::anno::display_name("Retroreflective Material - Gray Worn"),
+	    ::anno::author("Nvidia vMaterials"),
+        ::anno::description(DESCRIPTION),
+	    ::anno::contributor("Maik Rohland"),
+	    ::anno::contributor("Ruediger Raab"),
+	    ::anno::copyright_notice(COPYRIGHT),
+		::anno::thumbnail("./.thumbs/Retroreflective_Material.Retroreflective_Material_Gray_Worn.png"),
+        ::anno::key_words(string[]("foil", "plastic", "worn", "used", "construction", "safety", "automotive", "retroreflective", "reflective", "interior", "exterior", "smooth", "gray", "neutral"))
+]] = Retroreflective_Material(
+	material_color:				color(0.223228f, 0.223228f, 0.223228f),
+	retroreflective_tint:		color(1.0f),
+	retroreflection_roughness:	0.25f,
+	smudges_amount:				1.0f,
+	roughness:					0.75f,
+	bump_strength:				0.1f,
+	texture_translate:			float2(0.0f),
+	texture_rotate:				0.0f,
+	texture_scale:				float2(1.0f),
+	uv_space_index:				0
+);
+
+
+
+// 3
+export material Retroreflective_Material_White(*)
+[[
+        ::anno::display_name("Retroreflective Material - White"),
+	    ::anno::author("Nvidia vMaterials"),
+        ::anno::description(DESCRIPTION),
+	    ::anno::contributor("Maik Rohland"),
+	    ::anno::contributor("Ruediger Raab"),
+	    ::anno::copyright_notice(COPYRIGHT),
+		::anno::thumbnail("./.thumbs/Retroreflective_Material.Retroreflective_Material_White.png"),
+        ::anno::key_words(string[]("foil", "plastic", "new", "construction", "safety", "automotive", "retroreflective", "reflective", "interior", "exterior", "smooth", "white", "neutral"))
+]] = Retroreflective_Material(
+	material_color:				color(0.846873f, 0.846873f, 0.846873f),
+	retroreflective_tint:		color(1.0f),
+	retroreflection_roughness:	0.25f,
+	smudges_amount:				0.22f,
+	roughness:					0.75f,
+	bump_strength:				0.1f,
+	texture_translate:			float2(0.0f),
+	texture_rotate:				0.0f,
+	texture_scale:				float2(1.0f),
+	uv_space_index:				0
+);
+
+
+
+// 4
+export material Retroreflective_Material_Orange(*)
+[[
+        ::anno::display_name("Retroreflective Material - Orange"),
+	    ::anno::author("Nvidia vMaterials"),
+        ::anno::description(DESCRIPTION),
+	    ::anno::contributor("Maik Rohland"),
+	    ::anno::contributor("Ruediger Raab"),
+	    ::anno::copyright_notice(COPYRIGHT),
+		::anno::thumbnail("./.thumbs/Retroreflective_Material.Retroreflective_Material_Orange.png"),
+        ::anno::key_words(string[]("foil", "plastic", "new", "construction", "safety", "automotive", "retroreflective", "reflective", "interior", "exterior", "smooth", "orange", "warm", "saturated"))
+]] = Retroreflective_Material(
+	material_color:				color(1.000000f, 0.287441f, 0.000000f),
+	retroreflective_tint:		color(1.000000f, 0.423268f, 0.054480f),
+	retroreflection_roughness:	0.25f,
+	smudges_amount:				0.22f,
+	roughness:					0.75f,
+	bump_strength:				0.1f,
+	texture_translate:			float2(0.0f),
+	texture_rotate:				0.0f,
+	texture_scale:				float2(1.0f),
+	uv_space_index:				0
+);
+
+
+
+// 5
+export material Retroreflective_Material_Red(*)
+[[
+        ::anno::display_name("Retroreflective Material - Red"),
+	    ::anno::author("Nvidia vMaterials"),
+        ::anno::description(DESCRIPTION),
+	    ::anno::contributor("Maik Rohland"),
+	    ::anno::contributor("Ruediger Raab"),
+	    ::anno::copyright_notice(COPYRIGHT),
+		::anno::thumbnail("./.thumbs/Retroreflective_Material.Retroreflective_Material_Red.png"),
+        ::anno::key_words(string[]("foil", "plastic", "new", "construction", "safety", "automotive", "retroreflective", "reflective", "interior", "exterior", "smooth", "red", "saturated", "warm"))
+]] = Retroreflective_Material(
+	material_color:				color(0.814847f, 0.003035f, 0.003035f),
+	retroreflective_tint:		color(1.000000f, 0.194618f, 0.194618f),
+	retroreflection_roughness:	0.25f,
+	smudges_amount:				0.22f,
+	roughness:					0.75f,
+	bump_strength:				0.1f,
+	texture_translate:			float2(0.0f),
+	texture_rotate:				0.0f,
+	texture_scale:				float2(1.0f),
+	uv_space_index:				0
+);
+
+
+
+// 6
+export material Retroreflective_Material_Blue(*)
+[[
+        ::anno::display_name("Retroreflective Material - Blue"),
+	    ::anno::author("Nvidia vMaterials"),
+        ::anno::description(DESCRIPTION),
+	    ::anno::contributor("Maik Rohland"),
+	    ::anno::contributor("Ruediger Raab"),
+	    ::anno::copyright_notice(COPYRIGHT),
+		::anno::thumbnail("./.thumbs/Retroreflective_Material.Retroreflective_Material_Blue.png"),
+        ::anno::key_words(string[]("foil", "plastic", "new", "construction", "safety", "automotive", "retroreflective", "reflective", "interior", "exterior", "smooth", "blue", "cool", "saturated"))
+]] = Retroreflective_Material(
+	material_color:				color(0.012286f, 0.012286f, 0.737910f),
+	retroreflective_tint:		color(0.149960f, 0.152926f, 1.000000f),
+	retroreflection_roughness:	0.25f,
+	smudges_amount:				0.22f,
+	roughness:					0.75f,
+	bump_strength:				0.1f,
+	texture_translate:			float2(0.0f),
+	texture_rotate:				0.0f,
+	texture_scale:				float2(1.0f),
+	uv_space_index:				0
+);
+
+
+
+// 7
+export material Retroreflective_Material_Yellow(*)
+[[
+        ::anno::display_name("Retroreflective Material - Yellow"),
+	    ::anno::author("Nvidia vMaterials"),
+        ::anno::description(DESCRIPTION),
+	    ::anno::contributor("Maik Rohland"),
+	    ::anno::contributor("Ruediger Raab"),
+	    ::anno::copyright_notice(COPYRIGHT),
+		::anno::thumbnail("./.thumbs/Retroreflective_Material.Retroreflective_Material_Yellow.png"),
+        ::anno::key_words(string[]("foil", "plastic", "new", "construction", "safety", "automotive", "retroreflective", "reflective", "interior", "exterior", "smooth", "yellow", "warm", "saturated"))
+]] = Retroreflective_Material(
+	material_color:				color(1.000000f, 0.752942f, 0.000000f),
+	retroreflective_tint:		color(1.000000f, 0.830770f, 0.082283f),
+	retroreflection_roughness:	0.25f,
+	smudges_amount:				0.22f,
+	roughness:					0.75f,
+	bump_strength:				0.1f,
+	texture_translate:			float2(0.0f),
+	texture_rotate:				0.0f,
+	texture_scale:				float2(1.0f),
+	uv_space_index:				0
+);
