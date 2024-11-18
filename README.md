@@ -46,13 +46,14 @@ Trademarks This project may contain trademarks or logos for projects, products, 
 
 <img src="images/image2.png"/>
 
-Contoso Hypermarket, famously a leading international consumer goods distributor and retailer ([Jumpstart Agora](https://aka.ms/ArcJumpstartAgoraCHM)), has expanded to the food processing industry and are at the forefront of industrial digitization.With a sprawling operational footprint that spans multiple countries, the company is committed to leveraging cutting-edge technologies to drive innovation, operational excellence, sustainability, and safety across its extensive network of production facilities.
+Contoso Hypermarket, a leading international consumer goods distributor and retailer, is spearheading digital transformation in the retail industry. The company uses advanced technologies like Azure IoT Operations, NVIDIA Omniverse, and Universal Scene Description (OpenUSD) open and extensible ecosystem to enhance its warehouse operations. This integration allows for accurate 3D representations connected to real-time data, improving decision-making and efficiency.
 
-At the heart of their operations lies a sophisticated integration of Azure IoT Operations, NVIDIA Omniverse, and OpenUSD. This unique combination of platforms and technologies power physically accurate 3D representations of the company’s industrial systems, connected to real-time data at the edge. These capabilities enable their operations teams to gain a comprehensive view of operations, accelerate decision-making, and enhance overall operational efficiency.
+Many enterprises, including Contoso, are adopting AI for more automated systems, centralizing operations in remote centers with interactive 3D workflows. These workflows help teams quickly identify issues, perform analyses, and provide expert guidance.
 
-Like Contoso Hypermarket, many enterprises are embracing AI to achieve more automated and autonomous systems and facilities. This shift has led to the centralization of operations teams in remote operations centers, where they embrace more interactive and intuitive 3D workflows to achieve their goals. These workflows allow teams to quickly navigate areas of interest, identify issues, perform analyses, and provide expert guidance to distributed production sites.
+Microsoft and NVIDIA empower developers to create advanced 3D workflows that integrate IoT data with physics-based visualizations. The Fabric platform supports data management, while Omniverse and OpenUSD offer collaboration, simulation, and rendering capabilities. These tools help operations teams innovate and optimize for sustainability, safety, and efficiency.
 
-Microsoft and NVIDIA are empowering enterprises to transform their operations by enabling developers to build advanced 3D workflows that seamlessly unify and integrate operational IoT data with physics-based visualizations of operations. The Fabric platform provides developers with a robust foundation for data ingress and dissemination, while Omniverse and OpenUSD enable them to bring collaboration, simulation and physically based rendering capabilities to their solutions. By building solutions with these powerful capabilities, developers can ensure that operations teams are equipped with the tools and data they need to innovate and deliver more sustainable, safe, and efficient operations.
+>[!NOTE]
+>This Arc Jumpstart Drop focuses on building Omniverse and OpenUSD visualizations from real-time Edge data. For additional use-cases that illustrates other aspects of Contoso Hypermarket's digital transformation journey, see the Azure Arc Jumpstart Agora scenario: [Contoso Hypermarket](https://aka.ms/ArcJumpstartAgoraCHM).
 
 ## Omniverse Kit App Streaming Infrastructure Setup
 
@@ -337,7 +338,7 @@ Create the following inbound rules as shown in the screenshots below.
   <img src="images/image19.png" style="width:4.5in"/>
 
 In summary the following network rules should have been created, according to image below:
-  <img src="images/image20.png" style="width:6.5in"/>
+  <img src="images/image20.png" style="width:5in"/>
 
 #### *Assign to subnets 'subnet-aks' and 'subnet-apim'* 
 
@@ -352,7 +353,7 @@ and “subnet-aks” as the subnet to associate the network security group.
 
 In summary the assignment should be similar to this:
 
-<img src="images/image23.png" style="width:6.5in"/>
+<img src="images/image23.png" style="width:5in"/>
 
 ### DNS and Certificate Configuration
 
@@ -554,11 +555,11 @@ Sample forms of the node pool configurations provided below for quick reference.
 <img src="images/image27.png" style="width:3.2in"/>
 <img src="images/image28.png" style="width:3.2in"/> 
 
-<img src="images/image29.png" style="width:5.5in"/>
+<img src="images/image29.png" style="width:5in"/>
 
 In summary your node pools should look similar to this:
 
-<img src="images/azure_aks_node_pool_summary.png" style="width:5.5in"/>
+<img src="images/azure_aks_node_pool_summary.png" style="width:5in"/>
 
 - Please ensure you have sufficient capacity quota granted to your subscription. 
 - If required please open Azure support ticket to seek capacity allocation as described in [quickstart-increase-quota-portal](https://learn.microsoft.com/en-us/azure/quotas/quickstart-increase-quota-portal).
@@ -674,7 +675,7 @@ and configured. The configuration will be tied together with an [Application Gat
 
 1. Once deployed, add a custom domain:   
    1. Select Custom Domains under Deployment and Infrastructure  
-      <img src="images/image35.png" style="width:3.in"/> 
+      <img src="images/image35.png" style="width:2in"/> 
    2. Add a new custom domain for the gateway:   
       * **Type**: Gateway  
       * **Hostname**: [apim-gw.contoso-ov-kitappstreaming.net](http://apim-gw.ovas-streaming.net/)     ← This should be apim-gw.\<your private DNS\>  
@@ -701,28 +702,28 @@ and configured. The configuration will be tied together with an [Application Gat
 
 1. Navigate to APIs under APIs in the APIM
 
-    <img src="images/image65.png" style="width:9in"/> 
+    <img src="images/image65.png" style="width:6in"/> 
 
 2. Create a new API with the name HTTP
 
-    <img src="images/image66.png" style="width:11in"/> 
+    <img src="images/image66.png" style="width:6in"/> 
 
    1. Create a new GET operation under the HTTP API created in the last step
       * **URL**: `/*`
       * **Responses**:`200`
 
-    <img src="images/image67.png" style="width:10in"/> 
+    <img src="images/image67.png" style="width:6in"/> 
 
       1. Navigate to `Backend > HTTP(s) endpoint`
          1. Add the private DNS name given to the streaming services, `api.contoso-ov-kitstreaming.net`
          2. Check the `Override` box next to `Service URL`
          3. Select `HTTP(s) endpoint` instead of `Azure logic app`
 
-         <img src="images/image68.png" style="width:10in"/> 
+         <img src="images/image68.png" style="width:6in"/> 
 
     2. Repeat this for `POST`, `DELETE` and `OPTIONS`
 
-      <img src="images/image69.png" style="width:10in"/>
+      <img src="images/image69.png" style="width:5in"/>
 
 3. Turn off Subscription Key Requirement
    1. Go to `APIM` > `APIs` > `APIs` > `http get` > 
@@ -755,7 +756,7 @@ in the subsequent steps.
 * **Public IP**: Create new  
 * **Private IP**: Choose IP in private subnet range (e.g. 10.2.1.10)
 
-<img src="images/image39.png" style="width:6.5in"/>
+<img src="images/image39.png" style="width:6in"/>
 
 **Backends**
 
@@ -764,7 +765,7 @@ Create new
 * **Name**: apim  
 * **Backend target**: apim-gw.contoso-ov-kitappstreaming.net ← This should be apim-gw.\<your private DNS\>
 
-<img src="images/image40.png" style="width:6.5in"/>
+<img src="images/image40.png" style="width:6in"/>
 
 **Configuration**
 
@@ -778,7 +779,7 @@ Add new routing rule
   * **Protocol**: http  
   * **Port**: 80
 
-<img src="images/image41.png" style="width:5.4in/>
+<img src="images/image41.png" style="width:5.4in"/>
 
 **Backend targets**
 
@@ -867,7 +868,7 @@ Under Settings > Rules, click `waf-to-apim-internal`
 
 * **Target listener:** https
 
-<img src="images/image47.png" style="width:4.5in"/>
+<img src="images/image47.png" style="width:5in"/>
 
 **Post Deployment:**
 
@@ -883,7 +884,7 @@ Assign RBAC permissions to enterprise app registration created by AKS cluster
 
   * Search for the cluster name after selecting Managed Identities and add the managed identity of the AKS cluster
 
-<img src="images/image48.png" style="width:6.5in"
+<img src="images/image48.png" style="width:6in"
 />
 
 ## Omniverse Kit App Streaming Deployment and Configuration
@@ -1624,7 +1625,7 @@ This should (eventually) show `READY: True` in the output of:
 
 Go to the Private DNS Zone you created. Create the following recordset:
 
-<img src="images/image56.png" style="width:5in"
+<img src="images/image56.png" style="width:3.5in"
 />
 
 [api.contoso-ov-kitappstreaming.net](http://api.ovas-streaming.net/) -> private external ip of ingress controller LB service (e.g. 10.2.0.120 shown below)
