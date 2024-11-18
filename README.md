@@ -1804,6 +1804,10 @@ Once everything is setup correctly meshes or group of meshes with *asset_id* par
 
 <img src="images/image63.png" style="max-width:100%" />
 
+We have included a sample USD with many assets mapped with *asset_id*. Please look in folder */src/assets/sample_assets/* open the *scn_houston_facility/scn_houston_facility.usd* in Omniverse USD Composer to notice the *asset_id* in the Raw propeties on certain assets like *Pump 1* or *Pump 2*. This how the Bi-Directional selectability interaction occurs. If the *asset_id* maps to POWERBI_VISUAL_ID selection because of the setup above Bi-Directional selectability from Power BI slicer to 3D viewport and 3D viewport to Power BI slicer will occur.
+
+<img src="images/image70.png" style="max-width:100%" />
+
 #### *Event Hubs*
 
 Add role assignments to the Event Hubs Namespace and Event Hub itself via Access Control (IAM):
