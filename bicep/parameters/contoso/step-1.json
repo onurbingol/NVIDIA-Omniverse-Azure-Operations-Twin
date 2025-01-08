@@ -1,0 +1,48 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "eastus2"
+    },
+    "keyVaultName": {
+      "value": "kv-omniverse-01"
+    },
+    "keyVaultOperatorId" :{
+      "value": "529b2a7a-04d8-4b2b-8ec2-a95481670d47"
+    },
+    "virtualNetworkName": {
+      "value": "vnet-omniverse-01"
+    },
+    "vnetAddressPrefix": {
+      "value": "10.2.0.0/16"
+    },
+    "aksSubnetAddressPrefix": {
+      "value": "10.2.0.0/24"
+    },
+    "wafSubnetAddressPrefix": {
+      "value": "10.2.1.0/24"
+    },
+    "apimSubnetAddressPrefix": {
+      "value": "10.2.2.0/24"
+    },
+    "nsgNameExternal": {
+      "value": "nsg-omniverse-01-external"
+    },
+    "nsgNameInternal": {
+      "value": "nsg-omniverse-01-internal"
+    },
+    "backendDnsZoneName": {
+      "value": "backend.contoso-omniverse.com"
+    },
+    "logAnalyticsName": {
+      "value": "log-omniverse-01"
+    },
+    "appgwManagedIdentityName": {
+      "value": "msi-appgw"
+    },
+    "apimManagedIdentityName": {
+      "value": "msi-apim"
+    }
+  }
+}

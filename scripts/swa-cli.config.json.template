@@ -1,0 +1,14 @@
+{
+  "$schema": "https://aka.ms/azure/static-web-apps-cli/schema",
+  "configurations": {
+    "web-app": {
+      "appLocation": "${WEB_APP_PATH}",
+      "outputLocation": "dist",
+      "appBuildCommand": "npm run build",
+      "run": "npm run dev",
+      "appDevserverUrl": "${SWA_HOST_NAME}",
+      "appName": "${SWA_NAME}",
+      "resourceGroup": "${RESOURCE_GROUP_NAME}"
+    }
+  }
+}
