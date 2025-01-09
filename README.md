@@ -910,10 +910,6 @@ For questions and support please reach out via https://docs.omniverse.nvidia.com
 
 ### (Optional) Move External Dependencies to your own artifact storage
 
-
-**MB: We should probably warn that if they pull this stuff from nvidia that the folder structure will not match what we have in templates/working. We definitely no longer assume they are sourcing files from there. We should probably also mention that there are scripts that will automate the process, right?**
-
-
 This installation guide assumes you are sourcing and installing the Kit App Streaming API services with their
 Helm Charts and container images from [NVIDIA NGC](https://ngc.nvidia.com/). Besides this several other public resources
 are used for dependencies like [Flux](https://fluxcd.io/). In case you want your installation to refer to your own
