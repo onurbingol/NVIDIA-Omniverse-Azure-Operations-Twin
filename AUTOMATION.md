@@ -2,10 +2,11 @@
 
 ## General Notes
 
-The automation was all developed using Bash shell scripts on Ubuntu Linux. Porting to PowerShell in order to run on Windows should be easy however as the bulk of the work is done REST APIs.
+The automation was all developed using Bash shell scripts on Ubuntu Linux. Porting to PowerShell in order to run on Windows should be easy however as the bulk of the work is done via the relevant REST APIs.
 
 ## Configuration
-Create a copy of [`exports.sh.template`](./scripts/exports.sh.template) named `exports.sh` in the [`scripts`](./scripts) folder. Then update all of the values as necessary for your environment. This file will be used throughout the deployment process. 
+
+Create a copy of [`exports.sh.template`](./scripts/exports.sh.template) named `exports.sh` in the [`scripts`](./scripts) folder. Then update all of the values as necessary for your environment. This file will be used throughout the deployment process.
 
 ## Automation for Deployment of Back-end Azure Components
 
@@ -16,8 +17,6 @@ A number of tools are required in order to complete the installation and configu
 1. [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/) (Be sure to upgrade to the latest version via `az upgrade` -- at least 2.64.0)
 2. [Certbot](https://certbot.eff.org/)
 3. [OpenSSL](https://www.openssl.org/) (Probably included in your Linux distro)
-
-All of the automation was developed and tested in Ubuntu 24.04.01 running in [WSL](https://learn.microsoft.com/en-us/windows/wsl/about). There is nothing in the automation that specifically *requires* Linux, but running directly under Windows will likely require some modifications to commands, strings, etc.
 
 ### Deplyoment steps
 
@@ -48,7 +47,10 @@ All of the automation was developed and tested in Ubuntu 24.04.01 running in [WS
     ```bash
     az deployment group create --resource-group $RESOURCE_GROUP_NAME --template-file ./bicep/step-2.bicep --parameters ./bicep/parameters/contoso/step-2.json
     ```
+
 ## Automation for Deployment and configuration of Kubernetes Components
+
+The `install-k8s-components.sh` will perform all of the kubectl and helm steps necessary to install and configure the back-end services.
 
 ### Prerequisites
 
@@ -70,22 +72,26 @@ kubelogin convert-kubeconfig –l azurecli
 ./scripts/install-k8s-components.sh
 ```
 
-The `install-k8s-components.sh` will perform all of the kubectl and helm steps necessary to install and configure the back-end services. 
-
 ## Automation for Build and Deployment of the Kit-App
 
-### Prerequistes 
+The [`build-and-deploy-kit-app.sh`](./scripts/build-and-deploy-kit-app.sh) script will pull the source code from the kit-app-template repository, update configuration files, build the kit app, dockerize it, and push it to the Azure Container Registry created as part of the Bicep deployment.
 
-1. [Python/pip](https://www.python.org/downloads/) This is a big pre-req for a pretty small task. It's just used to update a toml config file. 
+### Prerequisites
+
+1. [Python/pip](https://www.python.org/downloads/) This is a big pre-req for a pretty small task. It's just used to update a toml config file.
 2. [Docker](https://www.docker.com/)
 3. [git lfs](https://git-lfs.github.com/)
 4. [npm/npx](https://www.npmjs.com/)
 
 ### Steps
 
-Run the [`build-and-deploy-kit-app.sh`](./scripts/build-and-deploy-kit-app.sh) script. It will pull the source code from the kit-app-template repository, update configuration files, build the kit app, dockerize it, and push it to the Azure Container Registry created as part of the Bicep deployment. 
+```bash
+./scripts/build-and-deploy-kit-app.sh
+```
 
 ## Automation for build and deploy of front-end components
+
+The [`build-and-deploy-web-app.sh`](./scripts/build-and-deploy-web-app.sh) will create and configure an Entra ID App Registration and then build and deploy the web app to the Static Web App created as part of the Bicep deployment.
 
 ### Prerequisites 
 
@@ -97,4 +103,6 @@ Run the [`build-and-deploy-kit-app.sh`](./scripts/build-and-deploy-kit-app.sh) s
 
 ### Steps
 
-Run the [`build-and-deploy-web-app.sh`](./scripts/build-and-deploy-web-app.sh) script. It will create and configure an Entra ID App Registration and then build and deploy the web app to the Static Web App created as part of the Bicep deployment. 
+```bash
+./scripts/build-and-deploy-web-app.sh
+```
