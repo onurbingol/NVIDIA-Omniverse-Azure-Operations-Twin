@@ -40,6 +40,16 @@ deps/**/user.toml
 **/web-app/node_modules/
 **/web-app/dist/
 
+/certificates/*
+/bicep/parameters/ccci/*
+/k8s/working/*
+/k8s/exports.sh
+/kas_installation/*
+
+/scripts/exports.sh
+
+
+/scripts/swa-cli.config.json
 
 
 
@@ -49,10 +59,4 @@ deps/**/user.toml
 
 
 
-
-
-
-
-
-
-
+.env

@@ -48,9 +48,9 @@ interface msalConfig {
 
 export const msalConfig = {
     auth: {
-        clientId: '', // Azure tenant (client id) xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-        authority: '', // For example: https://login.microsoftonline.com/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-        redirectUri: '', // Points to window.location.origin. You must register this URI on Microsoft Entra admin center/App Registration.
+        clientId: '${WEB_APP_APP_REGISTRATION_APP_ID}', // Azure tenant (client id) xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+        authority: 'https://login.microsoftonline.com/${TENANT_ID}', // For example: https://login.microsoftonline.com/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+        redirectUri: '${SWA_HOST_NAME}', // Points to window.location.origin. You must register this URI on Microsoft Entra admin center/App Registration.
         postLogoutRedirectUri: '/', // Indicates the page to navigate after logout.
         navigateToLoginRequestUrl: false, // If "true", will navigate back to the original request location before processing the auth code response.
     },
