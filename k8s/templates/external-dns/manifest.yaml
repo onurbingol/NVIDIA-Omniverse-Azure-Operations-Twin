@@ -3,6 +3,8 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: external-dns
+  annotations:
+    azure.workload.identity/client-id: ${AKS_IDENTITY_CLIENT_ID}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -33,8 +35,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: external-dns
-  annotations:
-    azure.workload.identity/client-id: ${AKS_IDENTITY_CLIENT_ID}
 spec:
   strategy:
     type: Recreate

@@ -18,7 +18,7 @@ A number of tools are required in order to complete the installation and configu
 2. [Certbot](https://certbot.eff.org/)
 3. [OpenSSL](https://www.openssl.org/) (Probably included in your Linux distro)
 
-### Deplyoment steps
+### Deployment steps
 
 1. Update all of the values in the json files in the ./bicep/paramaters/contoso folder
 
@@ -29,7 +29,7 @@ A number of tools are required in order to complete the installation and configu
 
     az login
     az group create --location $LOCATION --name $RESOURCE_GROUP_NAME
-    az deployment group create --resource-group $RESOURCE_GROUP_NAME --template-file ./bicep/step-1.bicep --parameters ./bicep/parameters/contoso/step-1.json  
+    az deployment group create --resource-group $RESOURCE_GROUP_NAME --template-file ./bicep/step-1.bicep --parameters ./bicep/parameters/contoso/step-1.json
     ```
 
 3. Create certificates and upload to Key Vault
@@ -39,7 +39,7 @@ A number of tools are required in order to complete the installation and configu
     If you have registered a domain and have control of DNS, you can use the "create-and-upload-certificates.sh" script that I have provided which will use [Certbot](https://certbot.eff.org/) to generate free [Let's Encrypt](https://letsencrypt.org/) certificates and upload them to the Key Vault that was created in step 2. This script takes a comma delimited list of FQDNs for which it will create *wildcard certificates.* If your requirements are different, feel free to modify as needed. Note that the script does a manual dns challenge for domain ownership verification. If you are familiar with how to set up certbot plugins, you can easily modify this to automate the verification.
 
     ```bash
-    ./certificates/create-and-upload-certificates.sh $DOMAINS $EMAIL $KEYVAULT_NAME
+    ./scripts/00-create-and-upload-certificates.sh
     ```
 
 4. Deploy Application Gateway, APIM, AKS. This step will take a while (up to 45 minutes) since APIM takes a long time to deploy.
@@ -50,7 +50,7 @@ A number of tools are required in order to complete the installation and configu
 
 ## Automation for Deployment and configuration of Kubernetes Components
 
-The `install-k8s-components.sh` will perform all of the kubectl and helm steps necessary to install and configure the back-end services.
+The `01-install-k8s-components.sh` will perform all of the kubectl and helm steps necessary to install and configure the back-end services.
 
 ### Prerequisites
 
@@ -69,12 +69,18 @@ az login
 az aks get-credentials --format azure --resource-group $AKS_RESOURCE_GROUP --name $AKS_CLUSTER_NAME
 kubelogin convert-kubeconfig –l azurecli
 
-./scripts/install-k8s-components.sh
+./scripts/01-install-k8s-components.sh
 ```
 
 ## Automation for Build and Deployment of the Kit-App
 
-The [`build-and-deploy-kit-app.sh`](./scripts/build-and-deploy-kit-app.sh) script will pull the source code from the kit-app-template repository, update configuration files, build the kit app, dockerize it, and push it to the Azure Container Registry created as part of the Bicep deployment.
+> [!IMPORTANT]
+> If you run into 403 permission issues downloading charts from NVIDIA Omniverse helm repository:
+> - Go to https://catalog.ngc.nvidia.com/orgs/nvidia/teams/omniverse/helm-charts/kit-appstreaming-session
+> - Click "Fetch version"
+> - Click "Get access"
+
+The [`02-build-and-deploy-kit-app.sh`](./scripts/02-build-and-deploy-kit-app.sh) script will pull the source code from the kit-app-template repository, update configuration files, build the kit app, dockerize it, and push it to the Azure Container Registry created as part of the Bicep deployment.
 
 ### Prerequisites
 
@@ -86,14 +92,14 @@ The [`build-and-deploy-kit-app.sh`](./scripts/build-and-deploy-kit-app.sh) scrip
 ### Steps
 
 ```bash
-./scripts/build-and-deploy-kit-app.sh
+./scripts/03-build-and-deploy-kit-app.sh
 ```
 
 ## Automation for build and deploy of front-end components
 
-The [`build-and-deploy-web-app.sh`](./scripts/build-and-deploy-web-app.sh) will create and configure an Entra ID App Registration and then build and deploy the web app to the Static Web App created as part of the Bicep deployment.
+The [`04-build-and-deploy-web-app.sh`](./scripts/04-build-and-deploy-web-app.sh) will create and configure an Entra ID App Registration and then build and deploy the web app to the Static Web App created as part of the Bicep deployment.
 
-### Prerequisites 
+### Prerequisites
 
 1. [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/)
 2. [jq](https://jqlang.github.io/jq/)
@@ -104,5 +110,5 @@ The [`build-and-deploy-web-app.sh`](./scripts/build-and-deploy-web-app.sh) will 
 ### Steps
 
 ```bash
-./scripts/build-and-deploy-web-app.sh
+./scripts/04-build-and-deploy-web-app.sh
 ```

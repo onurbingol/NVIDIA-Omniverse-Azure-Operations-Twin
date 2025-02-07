@@ -7,21 +7,25 @@ set -euo pipefail # fail on unset parameters, error on any command failure, prin
 
 SCRIPT_PATH=$(dirname "$(realpath "$0")")
 source $SCRIPT_PATH/exports.sh
+source $SCRIPT_PATH/utils.sh
 
 TEMPLATE_FOLDER=$SCRIPT_PATH/../k8s/templates
 WORKING_FOLDER=$SCRIPT_PATH/../k8s/working
 
 mkdir -p $WORKING_FOLDER
-rm -r $WORKING_FOLDER/*
+rm -rf "$WORKING_FOLDER"/*
 
-AKS_INFO=$(az aks show -n $AKS_CLUSTER_NAME -g $RESOURCE_GROUP_NAME)
+AKS_INFO=$(az aks show -n $AKS_CLUSTER_NAME -g $RESOURCE_GROUP_NAME --output json)
 export AKS_MANAGED_RESOURCE_GROUP=$(echo $AKS_INFO | jq -r .nodeResourceGroup)
 export AKS_IDENTITY_CLIENT_ID=$(az identity show --name $AKS_IDENTITY_NAME --resource-group $RESOURCE_GROUP_NAME --query clientId --output tsv)
 export SUBSCRIPTION_ID=$(az account show --query id -o tsv)
 
-helm repo add bitnami https://charts.bitnami.com/bitnami
-helm repo add nvidia https://helm.ngc.nvidia.com/nvidia
-helm repo add omniverse https://helm.ngc.nvidia.com/nvidia/omniverse/ --username='$oauthtoken' --password=$NGC_API_TOKEN
+# Add Helm repositories (if they don't exist)
+add_helm_repo "bitnami" "https://charts.bitnami.com/bitnami"
+add_helm_repo "fluxcd" "https://fluxcd-community.github.io/helm-charts"
+add_helm_repo "nvidia" "https://helm.ngc.nvidia.com/nvidia"
+add_helm_repo "omniverse" "https://helm.ngc.nvidia.com/nvidia/omniverse/" "--username=\$oauthtoken --password=$NGC_API_TOKEN"
+
 helm repo update
 
 kubectl create namespace omni-streaming --dry-run=client -o yaml | kubectl apply -f -
@@ -33,8 +37,8 @@ kubectl create secret -n omni-streaming generic ngc-omni-user --from-literal=use
     --save-config --dry-run=client -o json | kubectl apply -f -
 
 # =====================================================================================================================
-# Install ExternalDNS. Our config expects to operate against Azure DNS using Workload Identity. If you are using a 
-# different DNS provider, or have different authentication requirements, you will need to modify the external-dns 
+# Install ExternalDNS. Our config expects to operate against Azure DNS using Workload Identity. If you are using a
+# different DNS provider, or have different authentication requirements, you will need to modify the external-dns
 # manifest as needed. You can find instructions here: https://github.com/kubernetes-sigs/external-dns.
 # =====================================================================================================================
 
@@ -52,9 +56,9 @@ kubectl apply -f $WORKING_FOLDER/external-dns_manifest.yaml
 
 # =====================================================================================================================
 # Install nginx-ingress-controller. AKS should create an internal load balancer as part of this process. We will
-# wait for a minute by default for that to complete before attempting to add the A record for the API endpoint. 
-# You can increase or decrease the delay as needed via the NGINX_WAIT_TIME environment variable. 
-# FYI, this is the one we use: https://kubernetes.github.io/ingress-nginx/, not this one: 
+# wait for a minute by default for that to complete before attempting to add the A record for the API endpoint.
+# You can increase or decrease the delay as needed via the NGINX_WAIT_TIME environment variable.
+# FYI, this is the one we use: https://kubernetes.github.io/ingress-nginx/, not this one:
 # https://docs.nginx.com/nginx-ingress-controller/
 # =====================================================================================================================
 
@@ -70,7 +74,7 @@ sleep $NGINX_WAIT_TIME
 K8S_INTERNAL_LOAD_BALANCER_PRIVATE_IP=$(az network lb show -g $AKS_MANAGED_RESOURCE_GROUP -n kubernetes-internal --query "frontendIPConfigurations[0].privateIPAddress" -o tsv)
 
 records=$(az network private-dns record-set a list --resource-group $RESOURCE_GROUP_NAME --zone-name $PRIVATE_DNS_ZONE_NAME --query "[].name")
-if  echo $records | grep -w api; then 
+if  echo $records | grep -w api; then
     echo 'Record exists'
 else
     echo 'Creating record'
@@ -91,7 +95,8 @@ helm upgrade --install memcached oci://registry-1.docker.io/bitnamicharts/memcac
 
 echo "Installing flux2"
 envsubst < $TEMPLATE_FOLDER/flux2/values.yaml > $WORKING_FOLDER/flux2_values.yaml
-helm upgrade --install --namespace flux-operators --create-namespace  -f $WORKING_FOLDER/flux2_values.yaml fluxcd fluxcd-community/flux2
+helm upgrade --install --namespace flux-operators --create-namespace \
+    -f $WORKING_FOLDER/flux2_values.yaml fluxcd fluxcd/flux2
 
 # =====================================================================================================================
 # Install NVIDIA GPU Operator. https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/overview.html
@@ -111,14 +116,14 @@ helm upgrade --install --namespace omni-streaming -f $WORKING_FOLDER/kit-appstre
 
 echo "Installing NVIDIA Streaming Manager"
 envsubst < $TEMPLATE_FOLDER/kit-appstreaming-manager/values.yaml > $WORKING_FOLDER/kit-appstreaming-manager_values.yaml
-kubectl apply -n omni-streaming -f $SCRIPT_PATH/../k8s/templates/ngc-omniverse.yaml 
+kubectl apply -n omni-streaming -f $SCRIPT_PATH/../k8s/templates/ngc-omniverse.yaml
 helm upgrade --install --namespace omni-streaming -f $WORKING_FOLDER/kit-appstreaming-manager_values.yaml streaming omniverse/kit-appstreaming-manager
 
 echo "Installing NVIDIA Application"
 envsubst < $TEMPLATE_FOLDER/kit-appstreaming-applications/values.yaml > $WORKING_FOLDER/kit-appstreaming-applications_values.yaml
-helm upgrade --install --namespace omni-streaming -f $WORKING_FOLDER/kit-appstreaming-applications_values.yaml applications omniverse/kit-appstreaming-applications 
+helm upgrade --install --namespace omni-streaming -f $WORKING_FOLDER/kit-appstreaming-applications_values.yaml applications omniverse/kit-appstreaming-applications
 TOKEN_NAME=omniverse01-pull
-ACR_TOKEN=$(az acr token create --name $TOKEN_NAME --registry $ACR_NAME --scope-map _repositories_push_metadata_write --expiration $(date -u -d "+1 year" +"%Y-%m-%dT%H:%M:%SZ") --query "credentials.passwords[0].value" --output tsv)
+ACR_TOKEN=$(az acr token create --name $TOKEN_NAME --registry $ACR_NAME --scope-map _repositories_push_metadata_write --expiration $(get_utc_timestamp "+1 year") --query "credentials.passwords[0].value" --output tsv)
 kubectl create secret -n omni-streaming docker-registry myregcred --docker-server=$ACR_NAME.azurecr.io --docker-username=$TOKEN_NAME --docker-password=$ACR_TOKEN \
     --save-config --dry-run=client -o json | kubectl apply -f -
 

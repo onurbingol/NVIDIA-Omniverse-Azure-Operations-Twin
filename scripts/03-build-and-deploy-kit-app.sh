@@ -6,6 +6,7 @@ KIT_APP_WORKING_DIR=$(mktemp -d)
 echo "Created temporary working directory $KIT_APP_WORKING_DIR"
 
 source $SCRIPT_PATH/exports.sh
+source $SCRIPT_PATH/utils.sh
 
 echo "Cloning the kit app template repository to $KIT_APP_WORKING_DIR"
 
@@ -41,7 +42,7 @@ $KIT_APP_WORKING_DIR/repo.sh package --container
 # docker image list
 
 TOKEN_NAME=omniverse01-push
-TOKEN_PWD=$(az acr token create --name $TOKEN_NAME --registry $ACR_NAME --scope-map _repositories_push_metadata_write --expiration $(date -u -d "+1 hour" +"%Y-%m-%dT%H:%M:%SZ") --query "credentials.passwords[0].value" --output tsv)
+TOKEN_PWD=$(az acr token create --name $TOKEN_NAME --registry $ACR_NAME --scope-map _repositories_push_metadata_write --expiration $(get_utc_timestamp "+1 hour") --query "credentials.passwords[0].value" --output tsv)
 
 echo $TOKEN_PWD | docker login --username $TOKEN_NAME --password-stdin $ACR_NAME.azurecr.io
 
