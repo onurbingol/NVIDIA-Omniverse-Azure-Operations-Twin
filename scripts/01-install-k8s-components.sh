@@ -87,7 +87,8 @@ fi
 
 echo "Installing memcached"
 envsubst < $TEMPLATE_FOLDER/memcached/values.yaml > $WORKING_FOLDER/memcached_values.yaml
-helm upgrade --install memcached oci://registry-1.docker.io/bitnamicharts/memcached -n omni-streaming --create-namespace -f $WORKING_FOLDER/memcached_values.yaml
+helm upgrade --install memcached-service-r3 oci://registry-1.docker.io/bitnamicharts/memcached -n omni-streaming --create-namespace -f $WORKING_FOLDER/memcached_values.yaml
+
 
 # =====================================================================================================================
 # Install fluxcd. https://github.com/fluxcd/flux2
