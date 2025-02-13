@@ -8,7 +8,7 @@ source $SCRIPT_PATH/exports.sh
 # export SERVICE_ADDRESS="https://appgw.$PUBLIC_DNS_ZONE_NAME/streaming"
 export SWA_HOST_NAME="https://$(az staticwebapp show --name $SWA_NAME --output tsv --query defaultHostname)"
 echo "SWA_HOST_NAME: $SWA_HOST_NAME"
-appInfo=$(az ad app create --display-name $WEB_APP_APP_REGISTRATION_DISPLAY_NAME --required-resource-access @./scripts/entra-app-registration-manifest.json)
+appInfo=$(az ad app create --display-name $WEB_APP_APP_REGISTRATION_DISPLAY_NAME --required-resource-access @./scripts/entra-app-registration-manifest.json --output json)
 export WEB_APP_APP_REGISTRATION_OBJECT_ID=$(echo $appInfo | jq -r .id)
 export WEB_APP_APP_REGISTRATION_APP_ID=$(echo $appInfo | jq -r .appId)
 echo "WEB_APP_APP_REGISTRATION_OBJECT_ID: $WEB_APP_APP_REGISTRATION_OBJECT_ID, WEB_APP_APP_REGISTRATION_APP_ID: $WEB_APP_APP_REGISTRATION_APP_ID"
@@ -21,4 +21,4 @@ envsubst < $SCRIPT_PATH/swa-cli.config.json.template > $SCRIPT_PATH/swa-cli.conf
 npx swa init --yes
 npx swa build --app-location $WEB_APP_PATH --output-location $WEB_APP_PATH/dist
 npx swa login --resource-group $RESOURCE_GROUP_NAME --app-name $SWA_NAME
-npx swa deploy $WEB_APP_PATH/dist --env production --app-name $SWA_NAME 
+npx swa deploy $WEB_APP_PATH/dist --env production --app-name $SWA_NAME

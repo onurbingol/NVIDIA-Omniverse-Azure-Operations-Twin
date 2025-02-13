@@ -37,28 +37,21 @@
       },
       "appGwHostName": {
         "value": "appgw.frontend.contoso-omniverse.com"
-      },      
       "apimGwHostName": {
         "value": "apim-gw.backend.contoso-omniverse.com"
       },
       "apimMgmtHostName": {
         "value": "apim-mgmt.backend.contoso-omniverse.com"
-      },  
       "serviceUrl": {
         "value": "http://api.backend.contoso-omniverse.com"
-      }, 
       "apiManagementServiceName": {
         "value": "apim-omniverse-01"
-      }, 
       "applicationGatewayName": {
         "value": "appgw-omniverse-01"
-      }, 
       "keyVaultName": {
         "value": "kv-omniverse-01"
-      },       
       "aksClusterName": {
         "value": "aks-omniverse-01"
-      }, 
       "aksRbacAssignments" : {
         "value": [
           {
@@ -84,7 +77,6 @@
       },
       "frontendDnsZoneName": {
         "value": "frontend.contoso-omniverse.com"
-      },      
       "logAnalyticsName": {
         "value": "log-omniverse-01"
       },
@@ -102,5 +94,3 @@
       }
     }
   }
-  
-  
