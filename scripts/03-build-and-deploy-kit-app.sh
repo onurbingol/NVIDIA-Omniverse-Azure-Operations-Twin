@@ -10,7 +10,7 @@ source $SCRIPT_PATH/utils.sh
 
 echo "Cloning the kit app template repository to $KIT_APP_WORKING_DIR"
 
-git clone https://github.com/NVIDIA-Omniverse/kit-app-template $KIT_APP_WORKING_DIR
+git clone https://github.com/NVIDIA-Omniverse/kit-app-template -b 106.5 $KIT_APP_WORKING_DIR
 
 cp -r $SCRIPT_PATH/../kit-app-source/source $KIT_APP_WORKING_DIR
 
